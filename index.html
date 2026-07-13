@@ -1,0 +1,1322 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MediBook — Booking Klinik Online</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,600;0,700;1,300;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f8fafb;--bg2:#eef2f7;--bg3:#e4ebf3;--card:#ffffff;
+  --blue:#2d6be4;--blue2:#1a54cc;--blue3:rgba(45,107,228,.1);--blue4:rgba(45,107,228,.06);
+  --teal:#0ea5a0;--teal3:rgba(14,165,160,.1);
+  --rose:#e05c7a;--rose3:rgba(224,92,122,.1);
+  --amber:#d4860a;--amber3:rgba(212,134,10,.1);
+  --green:#16a34a;--green3:rgba(22,163,74,.1);
+  --text:#0f172a;--text2:#334155;--muted:#64748b;--dim:#94a3b8;
+  --border:rgba(15,23,42,.08);--border2:rgba(15,23,42,.14);
+  --shadow:0 1px 3px rgba(15,23,42,.06),0 4px 16px rgba(15,23,42,.05);
+  --shadowM:0 4px 24px rgba(15,23,42,.1),0 1px 4px rgba(15,23,42,.06);
+  --r:12px;--rx:18px;
+  --focus:0 0 0 3px rgba(45,107,228,.35);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:16px;scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;min-height:100vh;-webkit-font-smoothing:antialiased}
+button{font-family:inherit;cursor:pointer}
+input,select,textarea{font-family:inherit}
+svg{display:block}
+.icon{width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px;border-radius:4px}
+@media (prefers-reduced-motion: reduce){*,*::before,*::after{animation-duration:.001ms!important;transition-duration:.001ms!important}}
+
+/* TOPBAR */
+.topbar{position:sticky;top:0;z-index:200;background:rgba(255,255,255,.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:0 2rem;display:flex;align-items:center;gap:1rem;height:60px}
+.topbar-logo{display:flex;align-items:center;gap:.5rem;font-family:'Fraunces',serif;font-weight:700;font-size:1.15rem;letter-spacing:-.02em;color:var(--blue)}
+.logo-cross{width:28px;height:28px;background:var(--blue);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;flex-shrink:0}
+.logo-cross .icon{width:16px;height:16px;stroke-width:2.5}
+.topbar-nav{display:flex;gap:.25rem;margin-left:1.5rem}
+.nav-pill{padding:.38rem .9rem;border-radius:999px;font-size:.78rem;font-weight:600;color:var(--muted);background:transparent;border:none;cursor:pointer;transition:all .18s}
+.nav-pill:hover{background:var(--bg2);color:var(--text)}
+.nav-pill.active{background:var(--blue3);color:var(--blue)}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:.75rem;position:relative}
+.icon-btn{position:relative;background:var(--bg2);border:1px solid var(--border);border-radius:999px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-size:1rem;cursor:pointer;transition:all .18s;color:var(--text2)}
+.icon-btn:hover{background:var(--bg3)}
+.notif-badge{position:absolute;top:-2px;right:-2px;background:var(--rose);color:#fff;width:16px;height:16px;border-radius:50%;font-size:.55rem;font-weight:800;display:flex;align-items:center;justify-content:center;border:2px solid #fff}
+.avatar-btn{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--teal));display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;color:#fff;cursor:pointer;border:2px solid var(--border)}
+.hamburger{display:none;background:var(--bg2);border:1px solid var(--border);border-radius:8px;width:36px;height:36px;align-items:center;justify-content:center;color:var(--text2)}
+
+/* NOTIF PANEL */
+.notif-panel{position:absolute;top:46px;right:96px;width:300px;background:var(--card);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadowM);opacity:0;pointer-events:none;transform:translateY(-6px);transition:all .18s;z-index:300;max-height:360px;overflow-y:auto}
+.notif-panel.open{opacity:1;pointer-events:all;transform:translateY(0)}
+.notif-panel-hd{padding:.85rem 1rem;font-size:.78rem;font-weight:800;color:var(--text);border-bottom:1px solid var(--border)}
+.notif-item{padding:.8rem 1rem;border-bottom:1px solid var(--border);display:flex;gap:.6rem;align-items:flex-start}
+.notif-item:last-child{border-bottom:none}
+.notif-item .icon{color:var(--blue);margin-top:.15rem}
+.notif-item-title{font-size:.78rem;font-weight:700;color:var(--text)}
+.notif-item-sub{font-size:.72rem;color:var(--muted);margin-top:.1rem}
+.notif-empty{padding:1.6rem 1rem;text-align:center;font-size:.78rem;color:var(--muted)}
+
+/* PAGE */
+.page{display:none}
+.page.active{display:block}
+
+/* HERO */
+.hero-section{background:linear-gradient(135deg,#1a3a6e 0%,#2d6be4 50%,#0ea5a0 100%);padding:4rem 2rem 8rem;text-align:center;position:relative;overflow:hidden}
+.hero-section::before{content:'';position:absolute;inset:0;pointer-events:none;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Ccircle cx='30' cy='30' r='1' fill='rgba(255,255,255,.06)'/%3E%3C/svg%3E")}
+.hero-badge,.hero-title,.hero-sub,.hero-search,.stats-strip{position:relative;z-index:1}
+.hero-badge{display:inline-flex;align-items:center;gap:.5rem;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);border-radius:999px;padding:.3rem .9rem;font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.9);margin-bottom:1.5rem}
+.hero-title{font-family:'Fraunces',serif;font-size:clamp(2rem,5vw,3.5rem);font-weight:700;letter-spacing:-.03em;line-height:1.1;color:#fff;margin-bottom:.8rem}
+.hero-title em{font-style:italic;font-weight:300}
+.hero-sub{font-size:.95rem;color:rgba(255,255,255,.75);max-width:480px;margin:0 auto 2.5rem;line-height:1.7}
+.hero-search{background:#fff;border-radius:var(--rx);padding:1rem 1.2rem;max-width:640px;margin:0 auto;display:flex;align-items:center;gap:.75rem;box-shadow:0 20px 60px rgba(15,23,42,.2)}
+.search-field{flex:1;display:flex;align-items:center;gap:.6rem;border-right:1px solid var(--border);padding-right:.75rem}
+.search-icon{font-size:1.1rem;color:var(--blue);flex-shrink:0}
+.search-input{flex:1;background:transparent;border:none;outline:none;font-size:.88rem;color:var(--text)}
+.search-input::placeholder{color:var(--dim)}
+.search-select{flex:1;background:transparent;border:none;outline:none;font-size:.88rem;color:var(--text);cursor:pointer}
+.search-btn{background:var(--blue);color:#fff;border:none;padding:.65rem 1.4rem;border-radius:10px;font-size:.82rem;font-weight:700;cursor:pointer;transition:all .2s;white-space:nowrap}
+.search-btn:hover{background:var(--blue2);transform:translateY(-1px)}
+.stats-strip{display:flex;justify-content:center;gap:3rem;margin-top:2.5rem;position:relative;z-index:1}
+.stat-item{text-align:center}
+.stat-num{font-family:'Fraunces',serif;font-size:1.8rem;font-weight:700;color:#fff}
+.stat-lbl{font-size:.72rem;color:rgba(255,255,255,.65);margin-top:.15rem;font-weight:600;letter-spacing:.04em}
+
+/* CONTENT */
+.content{max-width:1160px;margin:-3rem auto 0;padding:0 2rem 4rem;position:relative;z-index:10}
+.sec-hd{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:1.4rem}
+.sec-title{font-family:'Fraunces',serif;font-size:1.4rem;font-weight:700;letter-spacing:-.02em;color:var(--text)}
+.sec-title em{font-style:italic;color:var(--blue);font-weight:300}
+.eyebrow{font-size:.62rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--dim);margin-bottom:.3rem}
+
+/* SPEC CHIPS */
+.spec-scroll{display:flex;gap:.5rem;overflow-x:auto;padding-bottom:.5rem;scrollbar-width:none}
+.spec-scroll::-webkit-scrollbar{display:none}
+.spec-chip{display:flex;align-items:center;gap:.45rem;flex-shrink:0;background:var(--card);border:1.5px solid var(--border);border-radius:999px;padding:.45rem 1rem;font-size:.78rem;font-weight:700;color:var(--text2);cursor:pointer;transition:border-color .2s,color .2s,background .2s;white-space:nowrap;opacity:1}
+.spec-chip:hover{border-color:var(--blue);color:#fff;background:var(--blue2);opacity:1}
+.spec-chip.active,.spec-chip.active:hover{border-color:var(--blue);color:#fff;background:var(--blue);box-shadow:0 4px 12px rgba(45,107,228,.3);opacity:1}
+.spec-chip span{font-size:1rem}
+
+/* FILTER BAR */
+.filter-bar{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;padding:.75rem 0;border-bottom:1px solid var(--border);margin-bottom:1.4rem}
+.filter-select{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:.4rem .8rem;font-size:.78rem;font-weight:600;color:var(--text);outline:none;cursor:pointer}
+.result-count{font-size:.78rem;color:var(--muted);margin-left:auto;font-weight:600}
+.reset-link{background:transparent;border:none;color:var(--blue);font-size:.76rem;font-weight:700;cursor:pointer;text-decoration:underline;text-underline-offset:2px}
+
+/* DOCTOR CARDS */
+.doctor-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1.2rem}
+.doctor-card{background:var(--card);border:1px solid var(--border);border-radius:var(--rx);overflow:hidden;box-shadow:var(--shadow);transition:transform .3s cubic-bezier(.16,1,.3,1),box-shadow .3s,border-color .2s;position:relative}
+.doctor-card:hover{transform:translateY(-4px);box-shadow:var(--shadowM);border-color:var(--border2)}
+.fav-toggle{position:absolute;top:.9rem;right:.9rem;z-index:2;width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.92);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--dim);transition:all .18s}
+.fav-toggle:hover{color:var(--rose);border-color:var(--rose)}
+.fav-toggle.active{color:var(--rose);border-color:var(--rose)}
+.fav-toggle.active .icon{fill:var(--rose)}
+.doctor-card-top{padding:1.4rem;display:flex;align-items:flex-start;gap:1rem;border-bottom:1px solid var(--border);cursor:pointer}
+.doctor-avatar{width:56px;height:56px;border-radius:14px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-weight:700;font-size:1.15rem}
+.doctor-name{font-size:.95rem;font-weight:800;color:var(--text);margin-bottom:.15rem;padding-right:1.6rem}
+.doctor-spec{font-size:.74rem;font-weight:600;color:var(--blue);margin-bottom:.3rem}
+.doctor-hospital{font-size:.72rem;color:var(--muted);display:flex;align-items:center;gap:.3rem}
+.doctor-hospital .icon{width:12px;height:12px}
+.doctor-card-bottom{padding:1rem 1.4rem;display:flex;align-items:center;justify-content:space-between}
+.rating-wrap{display:flex;align-items:center;gap:.35rem}
+.stars{display:flex;gap:1px;color:#f59e0b}
+.stars .icon{width:11px;height:11px;fill:#f59e0b;stroke:#f59e0b}
+.stars .icon.empty{fill:none;stroke:var(--border2)}
+.rating-num{font-size:.78rem;font-weight:700;color:var(--text2)}
+.review-cnt{font-size:.68rem;color:var(--dim)}
+.avail-badge{font-size:.65rem;font-weight:700;padding:.22rem .65rem;border-radius:999px;display:flex;align-items:center;gap:.3rem}
+.avail-badge.today{background:var(--green3);color:var(--green)}
+.avail-badge.busy{background:var(--amber3);color:var(--amber)}
+.avail-dot{width:5px;height:5px;border-radius:50%;background:currentColor}
+.doctor-card-price{padding:0 1.4rem 1.2rem;display:flex;align-items:center;justify-content:space-between}
+.price-lbl{font-size:.68rem;color:var(--muted);font-weight:600}
+.price-val{font-size:1rem;font-weight:800;color:var(--text)}
+.book-btn{background:var(--blue);color:#fff;border:none;padding:.5rem 1.1rem;border-radius:8px;font-size:.76rem;font-weight:700;cursor:pointer;transition:all .2s}
+.book-btn:hover{background:var(--blue2);transform:translateY(-1px)}
+.experience-badge{font-size:.65rem;font-weight:700;color:var(--teal);background:var(--teal3);padding:.18rem .55rem;border-radius:999px}
+.view-profile-btn{background:transparent;border:1px solid var(--border);color:var(--muted);padding:.5rem 1rem;border-radius:8px;font-size:.74rem;font-weight:700;cursor:pointer;transition:all .2s}
+.view-profile-btn:hover{border-color:var(--blue);color:var(--blue)}
+
+/* SKELETON */
+.skel-card{background:var(--card);border:1px solid var(--border);border-radius:var(--rx);padding:1.4rem;height:210px;overflow:hidden}
+.skel-line{background:linear-gradient(90deg,var(--bg2) 25%,var(--bg3) 37%,var(--bg2) 63%);background-size:400% 100%;animation:skel 1.4s ease infinite;border-radius:6px}
+@keyframes skel{0%{background-position:100% 50%}100%{background-position:0 50%}}
+
+/* MODAL (shared) */
+.modal-overlay{position:fixed;inset:0;z-index:600;background:rgba(15,23,42,.6);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;padding:1.5rem;opacity:0;pointer-events:none;transition:opacity .25s}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.doc-modal{background:var(--card);border:1px solid var(--border);border-radius:22px;width:100%;max-width:660px;max-height:90vh;overflow-y:auto;box-shadow:0 40px 100px rgba(15,23,42,.2);animation:modalUp .35s cubic-bezier(.16,1,.3,1)}
+@keyframes modalUp{from{transform:translateY(28px) scale(.97);opacity:0}to{transform:none;opacity:1}}
+.doc-modal-hero{background:linear-gradient(135deg,#1a3a6e,#2d6be4);padding:2rem;position:relative;overflow:hidden}
+.doc-modal-hero::before{content:'';position:absolute;inset:0;pointer-events:none;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Ccircle cx='20' cy='20' r='.8' fill='rgba(255,255,255,.08)'/%3E%3C/svg%3E")}
+.doc-modal-close{position:absolute;top:1rem;right:1rem;z-index:2;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);color:#fff;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .18s}
+.doc-modal-close:hover{background:rgba(255,255,255,.28)}
+.doc-modal-profile{display:flex;align-items:center;gap:1.2rem;position:relative;z-index:1}
+.doc-modal-avatar{width:72px;height:72px;border-radius:18px;display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-weight:700;font-size:1.6rem;border:3px solid rgba(255,255,255,.3);flex-shrink:0}
+.doc-modal-name{font-family:'Fraunces',serif;font-size:1.3rem;font-weight:700;color:#fff;margin-bottom:.2rem}
+.doc-modal-spec{font-size:.8rem;color:rgba(255,255,255,.8);font-weight:600;margin-bottom:.5rem}
+.doc-modal-badges{display:flex;gap:.4rem;flex-wrap:wrap}
+.doc-modal-badge{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);border-radius:999px;padding:.2rem .65rem;font-size:.65rem;font-weight:700;color:rgba(255,255,255,.9)}
+.doc-modal-body{padding:1.5rem}
+.doc-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:.6rem;margin-bottom:1.5rem}
+.doc-stat{background:var(--bg2);border:1px solid var(--border);border-radius:11px;padding:.85rem;text-align:center}
+.doc-stat-val{font-family:'Fraunces',serif;font-size:1.15rem;font-weight:700;color:var(--blue)}
+.doc-stat-lbl{font-size:.58rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--dim);margin-top:.15rem}
+.doc-section{margin-bottom:1.4rem}
+.doc-section-title{font-size:.65rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);margin-bottom:.65rem}
+.doc-bio{font-size:.86rem;color:var(--muted);line-height:1.75}
+.doc-schedule{display:grid;grid-template-columns:repeat(4,1fr);gap:.4rem}
+.doc-sched-day{background:var(--bg2);border:1px solid var(--border);border-radius:9px;padding:.65rem .5rem;text-align:center}
+.doc-sched-day.off{opacity:.35}
+.doc-sched-name{font-size:.68rem;font-weight:800;color:var(--text2);margin-bottom:.2rem}
+.doc-sched-time{font-size:.6rem;color:var(--muted)}
+.doc-reviews{display:flex;flex-direction:column;gap:.65rem}
+.doc-review{background:var(--bg2);border:1px solid var(--border);border-radius:11px;padding:.9rem}
+.doc-review-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:.3rem}
+.doc-review-author{font-size:.8rem;font-weight:800;color:var(--text)}
+.doc-review-date{font-size:.65rem;color:var(--dim)}
+.doc-review-stars{display:flex;gap:1px;margin-bottom:.3rem}
+.doc-review-stars .icon{width:11px;height:11px;fill:#f59e0b;stroke:#f59e0b}
+.doc-review-text{font-size:.8rem;color:var(--muted);line-height:1.6}
+.doc-modal-footer{padding:0 1.5rem 1.5rem;display:flex;gap:.65rem}
+.doc-book-btn{flex:1;background:var(--blue);color:#fff;border:none;padding:.9rem;border-radius:11px;font-size:.86rem;font-weight:800;cursor:pointer;transition:all .22s}
+.doc-book-btn:hover{background:var(--blue2);transform:translateY(-2px);box-shadow:0 8px 20px rgba(45,107,228,.3)}
+.doc-save-btn{background:var(--bg2);border:1px solid var(--border);color:var(--text2);padding:.9rem 1.2rem;border-radius:11px;font-size:.86rem;font-weight:700;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:.4rem}
+.doc-save-btn:hover{background:var(--bg3)}
+.doc-save-btn.active{color:var(--rose);border-color:var(--rose)}
+.doc-save-btn.active .icon{fill:var(--rose)}
+
+/* SMALL MODAL (review) */
+.mini-modal{background:var(--card);border:1px solid var(--border);border-radius:20px;width:100%;max-width:420px;box-shadow:0 40px 100px rgba(15,23,42,.2);animation:modalUp .3s cubic-bezier(.16,1,.3,1);padding:1.6rem}
+.mini-modal-hd{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1rem}
+.mini-modal-title{font-family:'Fraunces',serif;font-size:1.15rem;font-weight:700;color:var(--text)}
+.mini-modal-sub{font-size:.78rem;color:var(--muted);margin-top:.2rem}
+.star-picker{display:flex;gap:.4rem;margin:1rem 0}
+.star-picker button{background:none;border:none;padding:0;color:var(--border2);transition:transform .12s}
+.star-picker button .icon{width:28px;height:28px}
+.star-picker button.on{color:#f59e0b}
+.star-picker button.on .icon{fill:#f59e0b}
+.star-picker button:hover{transform:scale(1.12)}
+
+/* BOOKING FLOW */
+.booking-shell{display:grid;grid-template-columns:1fr 340px;gap:1.5rem;align-items:start}
+.booking-left{display:flex;flex-direction:column;gap:1.2rem}
+.booking-card{background:var(--card);border:1px solid var(--border);border-radius:var(--rx);padding:1.6rem;box-shadow:var(--shadow)}
+.booking-card-title{font-size:.9rem;font-weight:800;color:var(--text);margin-bottom:1.2rem;display:flex;align-items:center;gap:.5rem}
+.step-badge{width:24px;height:24px;border-radius:50%;background:var(--blue);color:#fff;font-size:.68rem;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .2s}
+.step-badge.done{background:var(--green)}
+.step-badge .icon{width:13px;height:13px;stroke-width:3}
+.booking-doc{display:flex;align-items:center;gap:1rem;padding:1rem;background:var(--blue4);border:1px solid rgba(45,107,228,.15);border-radius:12px;margin-bottom:1.2rem}
+.booking-doc-avatar{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-weight:700}
+.booking-doc-name{font-size:.9rem;font-weight:800;color:var(--text)}
+.booking-doc-spec{font-size:.75rem;color:var(--blue);font-weight:600}
+.booking-doc-price{margin-left:auto;font-size:1rem;font-weight:800;color:var(--blue)}
+.hint-text{font-size:.76rem;color:var(--muted);margin-top:-.6rem;margin-bottom:1rem;display:flex;align-items:center;gap:.4rem}
+.hint-text .icon{width:13px;height:13px;color:var(--amber)}
+
+/* CALENDAR */
+.cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem}
+.cal-month{font-size:.9rem;font-weight:800;color:var(--text)}
+.cal-nav{background:var(--bg2);border:1px solid var(--border);border-radius:8px;width:30px;height:30px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s}
+.cal-nav:hover{background:var(--bg3)}
+.cal-nav .icon{width:15px;height:15px}
+.cal-legend{display:flex;gap:1rem;margin-bottom:.85rem;font-size:.68rem;color:var(--muted)}
+.cal-legend span{display:flex;align-items:center;gap:.35rem}
+.cal-legend i{width:7px;height:7px;border-radius:50%;display:inline-block}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:.35rem}
+.cal-day-label{text-align:center;font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);padding:.3rem 0}
+.cal-day{aspect-ratio:1;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:600;cursor:pointer;transition:all .18s;position:relative;background:none;border:none;color:var(--text)}
+.cal-day.other{color:var(--dim);cursor:default;visibility:hidden}
+.cal-day.today{font-weight:800;color:var(--blue)}
+.cal-day.today::after{content:'';position:absolute;bottom:4px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:var(--blue)}
+.cal-day.avail:hover{background:var(--blue3);color:var(--blue)}
+.cal-day.sel{background:var(--blue)!important;color:#fff!important;font-weight:800}
+.cal-day.sel::after{display:none}
+.cal-day.past{color:var(--dim);cursor:not-allowed}
+.cal-day.off{color:var(--dim);cursor:not-allowed}
+.cal-day.off::after{content:'';position:absolute;bottom:4px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:var(--rose)}
+
+/* TIME SLOTS */
+.time-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;max-height:280px;overflow-y:auto;padding-right:.2rem}
+.time-slot{background:var(--bg2);border:1.5px solid var(--border);border-radius:8px;padding:.55rem;text-align:center;font-size:.78rem;font-weight:700;cursor:pointer;transition:all .18s;color:var(--text2)}
+.time-slot:hover:not(.taken){border-color:var(--blue);color:var(--blue);background:var(--blue4)}
+.time-slot.sel{background:var(--blue);border-color:var(--blue);color:#fff}
+.time-slot.taken{background:var(--bg3);color:var(--dim);cursor:not-allowed;text-decoration:line-through;opacity:.6}
+.time-empty{grid-column:1/-1;text-align:center;padding:1.5rem;color:var(--muted);font-size:.8rem}
+
+/* FORM */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:.85rem}
+.form-field{display:flex;flex-direction:column;gap:.35rem}
+.form-field.full{grid-column:span 2}
+.form-label{font-size:.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.form-input,.form-select,.form-textarea{background:var(--bg2);border:1.5px solid var(--border);border-radius:9px;padding:.62rem .9rem;font-size:.85rem;color:var(--text);outline:none;transition:border-color .2s,background .2s}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--blue);background:#fff}
+.form-input.err,.form-select.err{border-color:var(--rose);background:var(--rose3)}
+.field-err{font-size:.68rem;color:var(--rose);font-weight:600;min-height:1em}
+.form-textarea{resize:vertical;min-height:88px;line-height:1.55}
+.form-select{cursor:pointer}
+
+/* SUMMARY SIDEBAR */
+.summary-card{background:var(--card);border:1px solid var(--border);border-radius:var(--rx);overflow:hidden;box-shadow:var(--shadow);position:sticky;top:80px}
+.summary-header{background:linear-gradient(135deg,var(--blue),var(--blue2));padding:1.3rem 1.5rem;color:#fff}
+.summary-title{font-family:'Fraunces',serif;font-size:1.1rem;font-weight:700;margin-bottom:.15rem}
+.summary-sub{font-size:.75rem;opacity:.8}
+.summary-body{padding:1.2rem 1.5rem;display:flex;flex-direction:column;gap:1rem}
+.summary-row{display:flex;justify-content:space-between;align-items:flex-start;gap:.5rem}
+.summary-key{font-size:.75rem;font-weight:600;color:var(--muted);flex-shrink:0}
+.summary-val{font-size:.82rem;font-weight:700;color:var(--text);text-align:right}
+.summary-val.hl{color:var(--blue)}
+.summary-div{height:1px;background:var(--border)}
+.summary-total{display:flex;justify-content:space-between;align-items:center}
+.summary-total-lbl{font-size:.8rem;font-weight:700;color:var(--text2)}
+.summary-total-val{font-family:'Fraunces',serif;font-size:1.4rem;font-weight:700;color:var(--blue)}
+.confirm-btn{width:100%;background:var(--blue);color:#fff;border:none;padding:.9rem;font-size:.85rem;font-weight:800;cursor:pointer;transition:all .2s;border-radius:10px;letter-spacing:.02em}
+.confirm-btn:hover:not(:disabled){background:var(--blue2);transform:translateY(-1px);box-shadow:0 8px 20px rgba(45,107,228,.3)}
+.confirm-btn:disabled{background:var(--dim);cursor:not-allowed;transform:none;box-shadow:none}
+.summary-note{font-size:.7rem;color:var(--dim);text-align:center;line-height:1.5;margin-top:-.4rem}
+
+/* LOCKED STEP */
+.locked{opacity:.4;pointer-events:none}
+
+/* MY BOOKINGS */
+.booking-list{display:flex;flex-direction:column;gap:.85rem}
+.booking-item{background:var(--card);border:1px solid var(--border);border-radius:var(--rx);padding:1.3rem 1.5rem;display:flex;align-items:center;gap:1.2rem;box-shadow:var(--shadow);transition:all .2s;flex-wrap:wrap}
+.booking-item:hover{border-color:var(--border2);box-shadow:var(--shadowM)}
+.booking-item-avatar{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-weight:700;flex-shrink:0}
+.booking-item-info{flex:1;min-width:200px}
+.booking-item-doc{font-size:.9rem;font-weight:800;color:var(--text);margin-bottom:.15rem}
+.booking-item-spec{font-size:.74rem;color:var(--blue);font-weight:600;margin-bottom:.35rem}
+.booking-item-meta{display:flex;gap:.9rem;font-size:.72rem;color:var(--muted);flex-wrap:wrap}
+.booking-item-meta span{display:flex;align-items:center;gap:.3rem}
+.booking-item-meta .icon{width:12px;height:12px}
+.booking-status{padding:.28rem .8rem;border-radius:999px;font-size:.7rem;font-weight:800;letter-spacing:.04em;flex-shrink:0}
+.status-upcoming{background:var(--blue3);color:var(--blue)}
+.status-completed{background:var(--green3);color:var(--green)}
+.status-cancelled{background:var(--rose3);color:var(--rose)}
+.booking-item-actions{display:flex;gap:.5rem;flex-shrink:0}
+.action-btn{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:.38rem .75rem;font-size:.72rem;font-weight:700;cursor:pointer;transition:all .18s;color:var(--text2)}
+.action-btn:hover{background:var(--bg3);border-color:var(--border2)}
+.action-btn.danger:hover{background:var(--rose3);border-color:rgba(224,92,122,.3);color:var(--rose)}
+.action-btn:disabled{opacity:.55;cursor:not-allowed}
+
+/* SUCCESS */
+.success-wrap{display:flex;flex-direction:column;align-items:center;text-align:center;padding:4rem 2rem;max-width:520px;margin:0 auto}
+.success-icon{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--teal));display:flex;align-items:center;justify-content:center;color:#fff;margin-bottom:1.5rem;animation:popIn .5s cubic-bezier(.34,1.56,.64,1)}
+.success-icon .icon{width:36px;height:36px;stroke-width:2.5}
+@keyframes popIn{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
+.success-title{font-family:'Fraunces',serif;font-size:1.8rem;font-weight:700;letter-spacing:-.02em;color:var(--text);margin-bottom:.6rem}
+.success-sub{font-size:.9rem;color:var(--muted);line-height:1.7;margin-bottom:2rem}
+.booking-code{background:var(--blue4);border:1px solid rgba(45,107,228,.2);border-radius:12px;padding:1rem 2rem;font-family:'Fraunces',serif;font-size:1.5rem;font-weight:700;color:var(--blue);letter-spacing:.1em;margin-bottom:2rem}
+.success-detail{background:var(--card);border:1px solid var(--border);border-radius:var(--rx);padding:1.4rem;width:100%;text-align:left;box-shadow:var(--shadow);margin-bottom:1.5rem}
+.success-row{display:flex;justify-content:space-between;padding:.55rem 0;border-bottom:1px solid var(--border)}
+.success-row:last-child{border-bottom:none}
+.success-row-key{font-size:.78rem;color:var(--muted);font-weight:600}
+.success-row-val{font-size:.82rem;color:var(--text);font-weight:700}
+.success-actions{display:flex;gap:.75rem;width:100%}
+
+/* TOAST */
+.toast{position:fixed;bottom:1.5rem;right:1.5rem;z-index:999;background:var(--text);color:#fff;border-radius:12px;padding:.7rem 1.1rem;font-size:.8rem;font-weight:600;display:flex;align-items:center;gap:.5rem;box-shadow:0 8px 24px rgba(15,23,42,.2);transform:translateY(80px);opacity:0;transition:transform .35s cubic-bezier(.34,1.56,.64,1),opacity .3s}
+.toast.show{transform:translateY(0);opacity:1}
+.toast-dot{width:7px;height:7px;border-radius:50%;background:var(--green);flex-shrink:0}
+
+/* EMPTY STATE */
+.empty-state{text-align:center;padding:3rem 1rem;color:var(--muted)}
+.empty-state .icon{width:40px;height:40px;margin:0 auto 1rem;opacity:.35}
+.empty-state-title{font-size:.9rem;font-weight:700;color:var(--text2)}
+.empty-state-sub{font-size:.78rem;margin-top:.3rem}
+
+/* RESPONSIVE */
+@media(max-width:900px){.booking-shell{grid-template-columns:1fr}.summary-card{position:static}.time-grid{grid-template-columns:repeat(3,1fr)}.doc-stats{grid-template-columns:repeat(2,1fr)}.doc-schedule{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:640px){.topbar{padding:0 1rem}.topbar-nav{display:none}.hamburger{display:flex}.hero-section{padding:3rem 1rem 7rem}.content{padding:0 1rem 3rem}.hero-search{flex-direction:column;gap:.6rem}.search-field{border-right:none;border-bottom:1px solid var(--border);padding-right:0;padding-bottom:.6rem}.doctor-grid{grid-template-columns:1fr}.form-grid{grid-template-columns:1fr}.form-field.full{grid-column:span 1}.booking-item{flex-wrap:wrap}.notif-panel{right:1rem;left:1rem;width:auto}}
+.mobile-nav{display:none;flex-direction:column;gap:.25rem;padding:.75rem 1rem;border-bottom:1px solid var(--border);background:#fff}
+.mobile-nav.open{display:flex}
+.mobile-nav .nav-pill{text-align:left}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<header class="topbar">
+  <div class="topbar-logo"><div class="logo-cross">
+      <svg class="icon" viewBox="0 0 24 24"><path d="M12 2v20M2 12h20"/></svg>
+    </div>MediBook</div>
+  <nav class="topbar-nav">
+    <button class="nav-pill active" onclick="goPage('home')">Beranda</button>
+    <button class="nav-pill" onclick="goPage('bookings')">Booking Saya</button>
+  </nav>
+  <div class="topbar-right">
+    <button class="icon-btn" id="notifBtn" aria-label="Notifikasi" aria-haspopup="true" onclick="toggleNotif(event)">
+      <svg class="icon" viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      <span class="notif-badge" id="notifBadge" hidden>0</span>
+    </button>
+    <div class="notif-panel" id="notifPanel"></div>
+    <div class="avatar-btn" title="Aulya Salsabila">AS</div>
+    <button class="hamburger" aria-label="Menu" onclick="toggleMobileNav()">
+      <svg class="icon" viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
+  </div>
+</header>
+<div class="mobile-nav" id="mobileNav">
+  <button class="nav-pill active" onclick="goPage('home');toggleMobileNav()">Beranda</button>
+  <button class="nav-pill" onclick="goPage('bookings');toggleMobileNav()">Booking Saya</button>
+</div>
+
+<!-- HOME PAGE -->
+<div class="page active" id="page-home">
+  <div class="hero-section">
+    <div class="hero-badge">✚ Layanan Kesehatan Digital</div>
+    <h1 class="hero-title">Booking Dokter<br><em>Kapan Saja, Di Mana Saja</em></h1>
+    <p class="hero-sub">Temukan dokter terbaik, pilih jadwal yang sesuai jam praktiknya, dan booking dalam hitungan menit.</p>
+    <div class="hero-search">
+      <div class="search-field">
+        <svg class="icon search-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+        <input class="search-input" id="searchInput" placeholder="Cari nama dokter atau spesialisasi..." oninput="filterDoctors()" aria-label="Cari dokter">
+      </div>
+      <select class="search-select" id="specFilter" onchange="syncSpecChip();filterDoctors()" aria-label="Filter spesialisasi">
+        <option value="">Semua Spesialisasi</option>
+        <option>Umum</option><option>Gigi</option><option>Anak</option>
+        <option>Jantung</option><option>Kulit</option><option>Mata</option><option>Psikiatri</option>
+      </select>
+      <button class="search-btn" onclick="filterDoctors()">Cari</button>
+    </div>
+    <div class="stats-strip">
+      <div class="stat-item"><div class="stat-num">8</div><div class="stat-lbl">Dokter Aktif</div></div>
+      <div class="stat-item"><div class="stat-num" id="statBookings">3</div><div class="stat-lbl">Booking Anda</div></div>
+      <div class="stat-item"><div class="stat-num" id="statFav">0</div><div class="stat-lbl">Dokter Favorit</div></div>
+    </div>
+  </div>
+  <div class="content">
+    <div style="margin-bottom:2rem">
+      <div class="eyebrow" style="margin-bottom:.7rem">Spesialisasi</div>
+      <div class="spec-scroll" id="specChips">
+        <div class="spec-chip active" data-spec="" onclick="selectSpec(this)"><span>🏥</span> Semua</div>
+        <div class="spec-chip" data-spec="Umum" onclick="selectSpec(this)"><span>🩺</span> Umum</div>
+        <div class="spec-chip" data-spec="Gigi" onclick="selectSpec(this)"><span>🦷</span> Gigi</div>
+        <div class="spec-chip" data-spec="Anak" onclick="selectSpec(this)"><span>👶</span> Anak</div>
+        <div class="spec-chip" data-spec="Jantung" onclick="selectSpec(this)"><span>❤️</span> Jantung</div>
+        <div class="spec-chip" data-spec="Kulit" onclick="selectSpec(this)"><span>✨</span> Kulit</div>
+        <div class="spec-chip" data-spec="Mata" onclick="selectSpec(this)"><span>👁️</span> Mata</div>
+        <div class="spec-chip" data-spec="Psikiatri" onclick="selectSpec(this)"><span>🧠</span> Psikiatri</div>
+      </div>
+    </div>
+    <div class="filter-bar">
+      <select class="filter-select" id="sortFilter" onchange="filterDoctors()" aria-label="Urutkan">
+        <option value="rating">Rating Tertinggi</option>
+        <option value="price-asc">Harga Terendah</option>
+        <option value="price-desc">Harga Tertinggi</option>
+        <option value="exp">Pengalaman Terlama</option>
+      </select>
+      <select class="filter-select" id="availFilter" onchange="filterDoctors()" aria-label="Filter ketersediaan">
+        <option value="">Semua Jadwal</option>
+        <option value="today">Tersedia Hari Ini</option>
+        <option value="favorite">❤️ Favorit Saya</option>
+      </select>
+      <span class="result-count" id="resultCount">Menampilkan 8 dokter</span>
+    </div>
+    <div class="doctor-grid" id="doctorGrid"></div>
+  </div>
+</div>
+
+<!-- BOOKING PAGE -->
+<div class="page" id="page-booking">
+  <div class="content" style="margin-top:1.5rem">
+    <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:1.5rem;font-size:.78rem;color:var(--muted)">
+      <span style="cursor:pointer;color:var(--blue)" onclick="goPage('home')">Beranda</span>
+      <span>›</span><span style="cursor:pointer;color:var(--blue)" onclick="goPage('home')">Dokter</span>
+      <span>›</span><span id="breadcrumbDoc" style="color:var(--text);font-weight:600">Booking</span>
+    </div>
+    <div class="booking-shell">
+      <div class="booking-left">
+        <!-- Step 1: Doctor -->
+        <div class="booking-card">
+          <div class="booking-card-title"><span class="step-badge done"><svg class="icon" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></span> Dokter Dipilih</div>
+          <div class="booking-doc" id="bookingDocInfo"></div>
+        </div>
+        <!-- Step 2: Calendar -->
+        <div class="booking-card">
+          <div class="booking-card-title"><span class="step-badge" id="s2">2</span> Pilih Tanggal</div>
+          <div class="cal-legend"><span><i style="background:var(--blue)"></i> Hari ini</span><span><i style="background:var(--rose)"></i> Klinik libur</span></div>
+          <div class="cal-header">
+            <button class="cal-nav" onclick="changeMonth(-1)" aria-label="Bulan sebelumnya"><svg class="icon" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg></button>
+            <span class="cal-month" id="calMonth">—</span>
+            <button class="cal-nav" onclick="changeMonth(1)" aria-label="Bulan berikutnya"><svg class="icon" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></button>
+          </div>
+          <div class="cal-grid" id="calGrid"></div>
+        </div>
+        <!-- Step 3: Time -->
+        <div class="booking-card locked" id="timeCard">
+          <div class="booking-card-title"><span class="step-badge" id="s3">3</span> Pilih Jam</div>
+          <div class="time-grid" id="timeGrid"></div>
+        </div>
+        <!-- Step 4: Form -->
+        <div class="booking-card locked" id="formCard">
+          <div class="booking-card-title"><span class="step-badge" id="s4">4</span> Data Pasien</div>
+          <div class="form-grid">
+            <div class="form-field"><label class="form-label" for="patName">Nama Lengkap</label><input class="form-input" id="patName" placeholder="Nama sesuai KTP" oninput="validateField('patName');updateSummary()"><span class="field-err" id="err-patName"></span></div>
+            <div class="form-field"><label class="form-label" for="patPhone">No. Telepon</label><input class="form-input" id="patPhone" placeholder="08xx-xxxx-xxxx" oninput="validateField('patPhone');updateSummary()"><span class="field-err" id="err-patPhone"></span></div>
+            <div class="form-field"><label class="form-label" for="patDob">Tanggal Lahir</label><input class="form-input" type="date" id="patDob" oninput="validateField('patDob');updateSummary()"><span class="field-err" id="err-patDob"></span></div>
+            <div class="form-field">
+              <label class="form-label" for="patGender">Jenis Kelamin</label>
+              <select class="form-select" id="patGender" onchange="updateSummary()"><option value="">Pilih</option><option>Laki-laki</option><option>Perempuan</option></select>
+              <span class="field-err"></span>
+            </div>
+            <div class="form-field full"><label class="form-label" for="patComplaint">Keluhan / Gejala</label><textarea class="form-textarea" id="patComplaint" placeholder="Ceritakan keluhan yang dirasakan..." oninput="updateSummary()"></textarea></div>
+            <div class="form-field full">
+              <label class="form-label" for="patPayment">Metode Pembayaran</label>
+              <select class="form-select" id="patPayment" onchange="updateSummary()">
+                <option value="">Pilih metode</option>
+                <option>Transfer Bank (BCA)</option><option>GoPay / OVO / Dana</option><option>BPJS Kesehatan</option><option>Bayar di Klinik</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Summary Sidebar -->
+      <div>
+        <div class="summary-card">
+          <div class="summary-header"><div class="summary-title" id="summaryTitle">Ringkasan Booking</div><div class="summary-sub">Periksa detail sebelum konfirmasi</div></div>
+          <div class="summary-body">
+            <div class="summary-row"><span class="summary-key">Dokter</span><span class="summary-val hl" id="sumDoc">—</span></div>
+            <div class="summary-row"><span class="summary-key">Spesialisasi</span><span class="summary-val" id="sumSpec">—</span></div>
+            <div class="summary-row"><span class="summary-key">Klinik</span><span class="summary-val" id="sumHosp">—</span></div>
+            <div class="summary-row"><span class="summary-key">Tanggal</span><span class="summary-val" id="sumDate">Belum dipilih</span></div>
+            <div class="summary-row"><span class="summary-key">Jam</span><span class="summary-val" id="sumTime">Belum dipilih</span></div>
+            <div class="summary-row"><span class="summary-key">Pasien</span><span class="summary-val" id="sumPatient">—</span></div>
+            <div class="summary-row"><span class="summary-key">Pembayaran</span><span class="summary-val" id="sumPayment">—</span></div>
+            <div class="summary-div"></div>
+            <div class="summary-row"><span class="summary-key">Biaya Konsultasi</span><span class="summary-val" id="sumFee">—</span></div>
+            <div class="summary-row"><span class="summary-key">Biaya Admin</span><span class="summary-val">Rp 5.000</span></div>
+            <div class="summary-div"></div>
+            <div class="summary-total"><span class="summary-total-lbl">Total</span><span class="summary-total-val" id="sumTotal">—</span></div>
+            <button class="confirm-btn" id="confirmBtn" onclick="confirmBooking()" disabled>Konfirmasi Booking →</button>
+            <p class="summary-note">Dengan menekan tombol di atas, Anda menyetujui kebijakan pembatalan kami.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MY BOOKINGS PAGE -->
+<div class="page" id="page-bookings">
+  <div class="content" style="margin-top:1.5rem">
+    <div class="sec-hd" style="margin-bottom:1.5rem">
+      <div><div class="eyebrow">Riwayat</div><div class="sec-title">Booking <em>Saya</em></div></div>
+      <button class="search-btn" onclick="goPage('home')">+ Booking Baru</button>
+    </div>
+    <div style="display:flex;gap:.4rem;margin-bottom:1.5rem;border-bottom:1px solid var(--border);padding-bottom:.75rem">
+      <button class="nav-pill active" onclick="filterBookings('all',this)">Semua</button>
+      <button class="nav-pill" onclick="filterBookings('upcoming',this)">Mendatang</button>
+      <button class="nav-pill" onclick="filterBookings('completed',this)">Selesai</button>
+      <button class="nav-pill" onclick="filterBookings('cancelled',this)">Dibatalkan</button>
+    </div>
+    <div class="booking-list" id="bookingList"></div>
+  </div>
+</div>
+
+<!-- SUCCESS PAGE -->
+<div class="page" id="page-success">
+  <div class="content" style="margin-top:2rem">
+    <div class="success-wrap">
+      <div class="success-icon"><svg class="icon" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></div>
+      <h2 class="success-title" id="successTitle">Booking Berhasil!</h2>
+      <p class="success-sub" id="successSub">Jadwal konsultasi Anda telah dikonfirmasi. Pengingat akan dikirim 1 jam sebelum jadwal.</p>
+      <div class="booking-code" id="successCode">MBK-000000</div>
+      <div class="success-detail" id="successDetail"></div>
+      <div class="success-actions">
+        <button class="confirm-btn" onclick="goPage('bookings')" style="flex:1">Lihat Semua Booking</button>
+        <button onclick="goPage('home')" style="flex:1;background:var(--bg2);color:var(--text);border:1px solid var(--border);border-radius:10px;padding:.9rem;font-weight:800;cursor:pointer;transition:background .2s" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='var(--bg2)'">Booking Lagi</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DOCTOR PROFILE MODAL -->
+<div class="modal-overlay" id="docModal" onclick="handleModalClick(event,'doc')">
+  <div class="doc-modal" id="docModalBox" role="dialog" aria-modal="true"></div>
+</div>
+
+<!-- REVIEW MODAL -->
+<div class="modal-overlay" id="reviewModal" onclick="handleModalClick(event,'review')">
+  <div class="mini-modal" id="reviewModalBox" role="dialog" aria-modal="true"></div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast" role="status" aria-live="polite"><span class="toast-dot"></span><span id="toastMsg"></span></div>
+
+<script>
+/* ════════════ SEED DATA ════════════ */
+const doctorsSeed = [
+  { id:1, name:'dr. Anisa Rahma, Sp.A', spec:'Anak', hospital:'Klinik Sehat Bersama', exp:8, rating:4.9, reviews:142, fee:150000, initials:'AR', color:'#eff6ff', accent:'#2d6be4',
+    bio:'dr. Anisa Rahma adalah dokter spesialis anak dengan pengalaman 8 tahun. Beliau berspesialisasi dalam tumbuh kembang anak, imunisasi, dan penanganan penyakit infeksi pediatri. Lulusan FK Undip dan PPDS Anak RSCM Jakarta.',
+    schedule:[{day:'Sen',time:'08:00–12:00'},{day:'Sel',time:'13:00–17:00'},{day:'Rab',time:'08:00–12:00'},{day:'Kam',time:null},{day:'Jum',time:'08:00–11:00'},{day:'Sab',time:'08:00–10:00'},{day:'Min',time:null}],
+    patientReviews:[{author:'Budi S.',date:'10 Jun 2025',stars:5,text:'Dokternya sangat sabar dan teliti. Anak saya langsung merasa nyaman.'},{author:'Rina M.',date:'2 Mei 2025',stars:5,text:'Penjelasannya sangat detail dan mudah dipahami. Recommended!'}]},
+  { id:2, name:'dr. Budi Santoso, Sp.JP', spec:'Jantung', hospital:'RS Medika Prima', exp:15, rating:4.8, reviews:289, fee:300000, initials:'BS', color:'#fef2f2', accent:'#e05c7a',
+    bio:'dr. Budi Santoso adalah konsultan jantung dan pembuluh darah dengan 15 tahun pengalaman klinis. Ahli dalam kardiologi intervensi, ekokardiografi, dan penanganan gagal jantung. Lulusan FK UI dan fellowship di National Heart Centre Singapura.',
+    schedule:[{day:'Sen',time:'09:00–13:00'},{day:'Sel',time:null},{day:'Rab',time:'09:00–13:00'},{day:'Kam',time:'14:00–17:00'},{day:'Jum',time:'09:00–12:00'},{day:'Sab',time:null},{day:'Min',time:null}],
+    patientReviews:[{author:'Hendra T.',date:'5 Jul 2025',stars:5,text:'Sangat profesional, penjelasan penyakit jantung saya mudah dimengerti.'},{author:'Dewi L.',date:'20 Jun 2025',stars:5,text:'Dokter yang berpengalaman dan ramah. Saya merasa tenang setelah konsultasi.'}]},
+  { id:3, name:'drg. Citra Dewi', spec:'Gigi', hospital:'Dental Care Plus', exp:6, rating:4.7, reviews:98, fee:120000, initials:'CD', color:'#f0fdf4', accent:'#16a34a',
+    bio:'drg. Citra Dewi adalah dokter gigi umum yang berfokus pada estetika gigi dan perawatan ortodonti ringan. Penggemar teknik minimal invasif yang menjaga struktur gigi asli pasien semaksimal mungkin.',
+    schedule:[{day:'Sen',time:null},{day:'Sel',time:'10:00–16:00'},{day:'Rab',time:'10:00–16:00'},{day:'Kam',time:'10:00–16:00'},{day:'Jum',time:null},{day:'Sab',time:'09:00–13:00'},{day:'Min',time:null}],
+    patientReviews:[{author:'Sari W.',date:'12 Jun 2025',stars:5,text:'Tangan ringan dan tidak sakit sama sekali. Kliniknya juga bersih dan nyaman.'}]},
+  { id:4, name:'dr. Dimas Prakoso', spec:'Umum', hospital:'Puskesmas Tembalang', exp:4, rating:4.6, reviews:201, fee:50000, initials:'DP', color:'#fffbeb', accent:'#d4860a',
+    bio:'dr. Dimas Prakoso adalah dokter umum yang melayani pemeriksaan kesehatan rutin, surat keterangan sehat, dan penanganan penyakit umum. Aktif dalam program promotif kesehatan masyarakat.',
+    schedule:[{day:'Sen',time:'08:00–14:00'},{day:'Sel',time:'08:00–14:00'},{day:'Rab',time:'08:00–14:00'},{day:'Kam',time:'08:00–14:00'},{day:'Jum',time:'08:00–11:00'},{day:'Sab',time:null},{day:'Min',time:null}],
+    patientReviews:[{author:'Lina K.',date:'8 Jul 2025',stars:4,text:'Pelayanan cepat dan biaya terjangkau. Cocok untuk periksa rutin.'},{author:'Agus P.',date:'1 Jul 2025',stars:5,text:'Dokternya ramah dan sabar menjelaskan kondisi saya.'}]},
+  { id:5, name:'dr. Eriana Putri, Sp.KK', spec:'Kulit', hospital:'Klinik Kecantikan Medis', exp:9, rating:4.9, reviews:334, fee:200000, initials:'EP', color:'#fdf4ff', accent:'#a855c9',
+    bio:'dr. Eriana Putri adalah spesialis kulit dan kelamin dengan keahlian khusus di bidang dermatologi estetik, penanganan jerawat kronis, dan peremajaan kulit. Menggunakan teknologi laser dan radiofrequency terkini.',
+    schedule:[{day:'Sen',time:'10:00–16:00'},{day:'Sel',time:'10:00–16:00'},{day:'Rab',time:null},{day:'Kam',time:'10:00–16:00'},{day:'Jum',time:'10:00–14:00'},{day:'Sab',time:'09:00–12:00'},{day:'Min',time:null}],
+    patientReviews:[{author:'Maya R.',date:'9 Jul 2025',stars:5,text:'Kulitku jadi jauh lebih bersih setelah treatment. Dokternya sangat detail dan profesional.'},{author:'Feri A.',date:'25 Jun 2025',stars:5,text:'Akhirnya ketemu dokter yang paham masalah kulit saya. Hasilnya luar biasa!'}]},
+  { id:6, name:'dr. Fajar Nugroho, Sp.M', spec:'Mata', hospital:'Eye Center Semarang', exp:12, rating:4.7, reviews:176, fee:175000, initials:'FN', color:'#ecfeff', accent:'#0ea5a0',
+    bio:'dr. Fajar Nugroho adalah dokter spesialis mata dengan fokus pada bedah refraktif (LASIK), katarak, dan glaukoma. Telah menangani lebih dari 3.000 kasus bedah mata dengan tingkat keberhasilan tinggi.',
+    schedule:[{day:'Sen',time:'08:00–12:00'},{day:'Sel',time:null},{day:'Rab',time:'08:00–12:00'},{day:'Kam',time:'13:00–17:00'},{day:'Jum',time:'08:00–11:00'},{day:'Sab',time:null},{day:'Min',time:null}],
+    patientReviews:[{author:'Toni B.',date:'3 Jul 2025',stars:5,text:'Sangat profesional. Mata saya jauh lebih baik setelah prosedur.'}]},
+  { id:7, name:'dr. Gita Maharani, Sp.KJ', spec:'Psikiatri', hospital:'RS Jiwa Semarang', exp:7, rating:4.8, reviews:88, fee:250000, initials:'GM', color:'#f5f3ff', accent:'#7c5cd4',
+    bio:'dr. Gita Maharani adalah psikiater yang berspesialisasi dalam penanganan depresi, kecemasan, gangguan tidur, dan burnout. Pendekatan beliau mengintegrasikan psikoterapi dan farmakologi secara holistik.',
+    schedule:[{day:'Sen',time:'13:00–17:00'},{day:'Sel',time:'13:00–17:00'},{day:'Rab',time:null},{day:'Kam',time:'13:00–17:00'},{day:'Jum',time:'13:00–16:00'},{day:'Sab',time:null},{day:'Min',time:null}],
+    patientReviews:[{author:'Anon.',date:'7 Jul 2025',stars:5,text:'Dokternya membuat saya merasa aman untuk bercerita. Sangat membantu.'},{author:'Anon.',date:'1 Jun 2025',stars:5,text:'Penanganan yang sangat bijak dan tidak menghakimi. Terima kasih dok.'}]},
+  { id:8, name:'dr. Hendra Wijaya', spec:'Umum', hospital:'Klinik 24 Jam Banyumanik', exp:3, rating:4.5, reviews:156, fee:75000, initials:'HW', color:'#fff7ed', accent:'#e08c3a',
+    bio:'dr. Hendra Wijaya adalah dokter umum yang berpraktek di klinik 24 jam. Tersedia untuk konsultasi mendadak, penanganan gawat darurat ringan, dan pemeriksaan awal.',
+    schedule:[{day:'Sen',time:'00:00–24:00'},{day:'Sel',time:'00:00–24:00'},{day:'Rab',time:'00:00–24:00'},{day:'Kam',time:'00:00–24:00'},{day:'Jum',time:'00:00–24:00'},{day:'Sab',time:'00:00–24:00'},{day:'Min',time:'00:00–24:00'}],
+    patientReviews:[{author:'Rudi H.',date:'10 Jul 2025',stars:4,text:'Cepat dan tanggap walau tengah malam. Sangat menolong!'},{author:'Nita S.',date:'5 Jul 2025',stars:5,text:'Dokternya responsif dan kliniknya bersih. Harga juga terjangkau.'}]},
+];
+
+const bookingsSeed = [
+  {id:'MBK-240311',docId:2,docName:'dr. Budi Santoso, Sp.JP',spec:'Jantung',hospital:'RS Medika Prima',initials:'BS',color:'#fef2f2',date:'2026-07-20',time:'09:00',patient:'Aulya Salsabila',phone:'0812-3456-7890',dob:'1996-04-12',gender:'Perempuan',complaint:'Kontrol rutin tekanan darah',payment:'Transfer Bank (BCA)',fee:300000,status:'upcoming',reviewed:false},
+  {id:'MBK-231205',docId:5,docName:'dr. Eriana Putri, Sp.KK',spec:'Kulit',hospital:'Klinik Kecantikan Medis',initials:'EP',color:'#fdf4ff',date:'2025-12-05',time:'14:30',patient:'Aulya Salsabila',phone:'0812-3456-7890',dob:'1996-04-12',gender:'Perempuan',complaint:'Konsultasi jerawat',payment:'GoPay / OVO / Dana',fee:200000,status:'completed',reviewed:false},
+  {id:'MBK-231102',docId:1,docName:'dr. Anisa Rahma, Sp.A',spec:'Anak',hospital:'Klinik Sehat Bersama',initials:'AR',color:'#eff6ff',date:'2025-11-02',time:'10:00',patient:'Aulya Salsabila',phone:'0812-3456-7890',dob:'2020-02-14',gender:'Laki-laki',complaint:'Imunisasi rutin',payment:'BPJS Kesehatan',fee:150000,status:'cancelled',reviewed:false},
+];
+
+const MONTHS = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+const WDAYS  = ['Min','Sen','Sel','Rab','Kam','Jum','Sab'];
+const DAYNAMES = ['Sen','Sel','Rab','Kam','Jum','Sab','Min'];
+const DOW_TO_SCHED = {1:0,2:1,3:2,4:3,5:4,6:5,0:6}; // JS getDay() -> schedule array index
+
+let doctors = doctorsSeed.map(d=>({...d, patientReviews:[...d.patientReviews]}));
+let myBookings = [];
+let favorites = new Set();
+
+let currentDoc=null, selectedDate=null, selectedTime=null, calYear, calMonth;
+let editingBookingId=null;
+let reviewTargetBookingId=null, reviewStars=0;
+const fmt = n => 'Rp ' + n.toLocaleString('id-ID');
+const todayStr = () => { const t=new Date(); return `${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-${String(t.getDate()).padStart(2,'0')}`; };
+
+/* ════════════ ICONS ════════════ */
+const ICONS = {
+  hospital:'<svg class="icon" viewBox="0 0 24 24"><path d="M19 21V5a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v16"/><path d="M9 21v-4h6v4"/><path d="M9 9h1M9 13h1M14 9h1M14 13h1"/></svg>',
+  calendar:'<svg class="icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>',
+  clock:'<svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>',
+  user:'<svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>',
+  card:'<svg class="icon" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>',
+  star:'<svg class="icon" viewBox="0 0 24 24"><path d="M12 2.5l3 6.1 6.7 1-4.9 4.7 1.2 6.7-6-3.2-6 3.2 1.2-6.7L2.3 9.6l6.7-1z"/></svg>',
+  heart:'<svg class="icon" viewBox="0 0 24 24"><path d="M20.8 8.6a5.5 5.5 0 0 0-9.5-3.8l-1.3 1.3-1.3-1.3A5.5 5.5 0 1 0 3.2 12.4L12 21l8.8-8.6a5.5 5.5 0 0 0 0-3.8z"/></svg>',
+  alert:'<svg class="icon" viewBox="0 0 24 24"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>',
+  bell:'<svg class="icon" viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/></svg>',
+};
+function stars(rating, size=5){
+  let h='';
+  for(let i=1;i<=size;i++){
+    h += `<svg class="icon${i>rating+0.24?' empty':''}" viewBox="0 0 24 24"><path d="M12 2.5l3 6.1 6.7 1-4.9 4.7 1.2 6.7-6-3.2-6 3.2 1.2-6.7L2.3 9.6l6.7-1z"/></svg>`;
+  }
+  return h;
+}
+
+/* ════════════ PERSISTENCE ════════════ */
+async function loadState(){
+  try{
+    const res = await window.storage.get('medibook-state');
+    if(res && res.value){
+      const data = JSON.parse(res.value);
+      myBookings = data.bookings && data.bookings.length ? data.bookings : bookingsSeed.map(b=>({...b}));
+      favorites = new Set(data.favorites||[]);
+      if(data.doctorOverrides){
+        for(const ov of data.doctorOverrides){
+          const d = doctors.find(x=>x.id===ov.id);
+          if(d){ d.rating=ov.rating; d.reviews=ov.reviews; d.patientReviews=ov.patientReviews; }
+        }
+      }
+      return;
+    }
+  }catch(e){ /* no saved state yet */ }
+  myBookings = bookingsSeed.map(b=>({...b}));
+  favorites = new Set();
+  await saveState();
+}
+async function saveState(){
+  try{
+    const doctorOverrides = doctors.map(d=>({id:d.id, rating:d.rating, reviews:d.reviews, patientReviews:d.patientReviews}));
+    await window.storage.set('medibook-state', JSON.stringify({
+      bookings: myBookings, favorites: Array.from(favorites), doctorOverrides
+    }));
+  }catch(e){ console.error('Gagal menyimpan data', e); }
+}
+
+/* ════════════ PAGE NAV ════════════ */
+function goPage(id) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  document.querySelectorAll('.topbar-nav .nav-pill, .mobile-nav .nav-pill').forEach((b,i)=>{
+    const idx = i % 2;
+    b.classList.toggle('active',(idx===0&&id==='home')||(idx===1&&id==='bookings'));
+  });
+  window.scrollTo({top:0,behavior:'smooth'});
+  if(id==='bookings') renderBookings('all');
+  closeNotif();
+  updateHeaderStats();
+}
+
+function toggleMobileNav(){ document.getElementById('mobileNav').classList.toggle('open'); }
+
+/* ════════════ AVATAR ════════════ */
+function avatarHtml(color, initials){
+  return `<div class="doctor-avatar" style="background:${color};color:var(--text2)">${initials}</div>`;
+}
+
+/* ════════════ DOCTORS ════════════ */
+function scheduleFor(doctor, dateObj){
+  return doctor.schedule[DOW_TO_SCHED[dateObj.getDay()]];
+}
+function isAvailableToday(doctor){
+  const now = new Date();
+  return !!scheduleFor(doctor, now).time;
+}
+
+function renderDoctorsSkeleton(){
+  const g = document.getElementById('doctorGrid');
+  g.innerHTML = Array.from({length:6}).map(()=>`
+    <div class="skel-card">
+      <div style="display:flex;gap:1rem;margin-bottom:1rem">
+        <div class="skel-line" style="width:56px;height:56px;border-radius:14px"></div>
+        <div style="flex:1;display:flex;flex-direction:column;gap:.5rem;padding-top:.3rem">
+          <div class="skel-line" style="height:14px;width:70%"></div>
+          <div class="skel-line" style="height:10px;width:50%"></div>
+        </div>
+      </div>
+      <div class="skel-line" style="height:10px;width:90%;margin-bottom:.6rem"></div>
+      <div class="skel-line" style="height:10px;width:60%"></div>
+    </div>`).join('');
+}
+
+function renderDoctors(list) {
+  const g=document.getElementById('doctorGrid');
+  document.getElementById('resultCount').textContent=`Menampilkan ${list.length} dokter`;
+  if(!list.length){
+    g.innerHTML=`<div class="empty-state" style="grid-column:1/-1">${ICONS.hospital.replace('class="icon"','class="icon"')}<div class="empty-state-title">Tidak ada dokter yang sesuai</div><div class="empty-state-sub">Coba ubah kata kunci atau filter pencarian.</div></div>`;
+    return;
+  }
+  g.innerHTML=list.map(d=>{
+    const today = isAvailableToday(d);
+    const isFav = favorites.has(d.id);
+    return `
+    <div class="doctor-card">
+      <button class="fav-toggle${isFav?' active':''}" aria-label="${isFav?'Hapus dari favorit':'Simpan ke favorit'}" onclick="event.stopPropagation();toggleFavorite(${d.id})">${ICONS.heart}</button>
+      <div class="doctor-card-top" onclick="openDocModal(${d.id})">
+        ${avatarHtml(d.color, d.initials)}
+        <div style="flex:1">
+          <div class="doctor-name">${d.name}</div>
+          <div class="doctor-spec">${d.spec}</div>
+          <div class="doctor-hospital">${ICONS.hospital} ${d.hospital}</div>
+          <div style="margin-top:.45rem"><span class="experience-badge">${d.exp} thn pengalaman</span></div>
+        </div>
+      </div>
+      <div class="doctor-card-bottom">
+        <div class="rating-wrap">
+          <div class="stars">${stars(d.rating)}</div>
+          <span class="rating-num">${d.rating.toFixed(1)}</span>
+          <span class="review-cnt">(${d.reviews})</span>
+        </div>
+        <div class="avail-badge ${today?'today':'busy'}">
+          <span class="avail-dot"></span>${today?'Tersedia Hari Ini':'Cek Jadwal'}
+        </div>
+      </div>
+      <div class="doctor-card-price">
+        <div><div class="price-lbl">Biaya Konsultasi</div><div class="price-val">${fmt(d.fee)}</div></div>
+        <div style="display:flex;gap:.4rem">
+          <button class="view-profile-btn" onclick="openDocModal(${d.id})">Profil</button>
+          <button class="book-btn" onclick="openBooking(${d.id})">Booking →</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleFavorite(id){
+  if(favorites.has(id)) favorites.delete(id); else favorites.add(id);
+  saveState();
+  updateHeaderStats();
+  filterDoctors();
+  showToast(favorites.has(id) ? 'Ditambahkan ke favorit ♥' : 'Dihapus dari favorit');
+  const dm = document.getElementById('docModalBox');
+  if(currentModalDocId===id) refreshDocModalSaveBtn(id);
+}
+
+function selectSpec(el) {
+  const spec = el.dataset.spec;
+  document.querySelectorAll('.spec-chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('specFilter').value = spec;
+  filterDoctors();
+}
+
+function syncSpecChip() {
+  const spec = document.getElementById('specFilter').value;
+  document.querySelectorAll('.spec-chip').forEach(c=>{
+    c.classList.toggle('active', c.dataset.spec === spec);
+  });
+}
+
+function resetFilters(){
+  document.getElementById('searchInput').value='';
+  document.getElementById('specFilter').value='';
+  document.getElementById('sortFilter').value='rating';
+  document.getElementById('availFilter').value='';
+  syncSpecChip();
+  filterDoctors();
+}
+
+function filterDoctors() {
+  const q     = (document.getElementById('searchInput').value||'').toLowerCase();
+  const spec  = document.getElementById('specFilter').value;
+  const sort  = document.getElementById('sortFilter').value;
+  const avail = document.getElementById('availFilter').value;
+  let list = doctors.filter(d=>{
+    const mq = !q || d.name.toLowerCase().includes(q)||d.spec.toLowerCase().includes(q)||d.hospital.toLowerCase().includes(q);
+    const ms = !spec || d.spec===spec;
+    const ma = avail!=='today' || isAvailableToday(d);
+    const mf = avail!=='favorite' || favorites.has(d.id);
+    return mq&&ms&&ma&&mf;
+  });
+  if(sort==='rating')     list.sort((a,b)=>b.rating-a.rating);
+  if(sort==='price-asc')  list.sort((a,b)=>a.fee-b.fee);
+  if(sort==='price-desc') list.sort((a,b)=>b.fee-a.fee);
+  if(sort==='exp')        list.sort((a,b)=>b.exp-a.exp);
+  renderDoctors(list);
+}
+
+/* ════════════ DOCTOR PROFILE MODAL ════════════ */
+let currentModalDocId=null;
+function openDocModal(id) {
+  const d = doctors.find(x=>x.id===id);
+  if(!d) return;
+  currentModalDocId=id;
+  const schedHtml = DAYNAMES.map((day,i)=>{
+    const s = d.schedule[i];
+    return `<div class="doc-sched-day${!s.time?' off':''}">
+      <div class="doc-sched-name">${s.day}</div>
+      <div class="doc-sched-time">${s.time||'Libur'}</div>
+    </div>`;
+  }).join('');
+  const reviewsHtml = d.patientReviews.length ? d.patientReviews.map(r=>`
+    <div class="doc-review">
+      <div class="doc-review-top"><span class="doc-review-author">${r.author}</span><span class="doc-review-date">${r.date}</span></div>
+      <div class="doc-review-stars">${stars(r.stars)}</div>
+      <div class="doc-review-text">${r.text}</div>
+    </div>`).join('') : `<div class="empty-state" style="padding:1.5rem"><div class="empty-state-sub">Belum ada ulasan.</div></div>`;
+
+  const today = isAvailableToday(d);
+  document.getElementById('docModalBox').innerHTML = `
+    <div class="doc-modal-hero">
+      <button class="doc-modal-close" onclick="closeDocModal()" aria-label="Tutup">✕</button>
+      <div class="doc-modal-profile">
+        <div class="doc-modal-avatar" style="background:${d.color};color:var(--text2)">${d.initials}</div>
+        <div>
+          <div class="doc-modal-name">${d.name}</div>
+          <div class="doc-modal-spec">${d.spec} · ${d.hospital}</div>
+          <div class="doc-modal-badges">
+            <span class="doc-modal-badge">${d.exp} thn pengalaman</span>
+            <span class="doc-modal-badge">${today?'✅ Tersedia Hari Ini':'🕐 Cek Jadwal Praktik'}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="doc-modal-body">
+      <div class="doc-stats">
+        <div class="doc-stat"><div class="doc-stat-val">${d.rating.toFixed(1)}</div><div class="doc-stat-lbl">Rating</div></div>
+        <div class="doc-stat"><div class="doc-stat-val">${d.reviews}</div><div class="doc-stat-lbl">Ulasan</div></div>
+        <div class="doc-stat"><div class="doc-stat-val">${d.exp}+</div><div class="doc-stat-lbl">Thn Exp</div></div>
+        <div class="doc-stat"><div class="doc-stat-val" style="font-size:.95rem">${fmt(d.fee)}</div><div class="doc-stat-lbl">Konsultasi</div></div>
+      </div>
+      <div class="doc-section">
+        <div class="doc-section-title">Tentang Dokter</div>
+        <div class="doc-bio">${d.bio}</div>
+      </div>
+      <div class="doc-section">
+        <div class="doc-section-title">Jadwal Praktik</div>
+        <div class="doc-schedule">${schedHtml}</div>
+      </div>
+      <div class="doc-section">
+        <div class="doc-section-title">Ulasan Pasien</div>
+        <div class="doc-reviews">${reviewsHtml}</div>
+      </div>
+    </div>
+    <div class="doc-modal-footer">
+      <button class="doc-book-btn" onclick="closeDocModal();openBooking(${d.id})">Booking Sekarang →</button>
+      <button class="doc-save-btn" id="modalSaveBtn" onclick="toggleFavorite(${d.id})"></button>
+    </div>`;
+  refreshDocModalSaveBtn(id);
+
+  document.getElementById('docModal').classList.add('open');
+  document.body.style.overflow='hidden';
+  document.getElementById('docModal').querySelector('.doc-modal-close').focus();
+}
+function refreshDocModalSaveBtn(id){
+  const btn = document.getElementById('modalSaveBtn');
+  if(!btn) return;
+  const isFav = favorites.has(id);
+  btn.classList.toggle('active', isFav);
+  btn.innerHTML = `${ICONS.heart} ${isFav?'Tersimpan':'Simpan'}`;
+}
+
+function closeDocModal() {
+  document.getElementById('docModal').classList.remove('open');
+  document.body.style.overflow='';
+}
+
+function handleModalClick(e, which) {
+  const overlay = which==='doc' ? document.getElementById('docModal') : document.getElementById('reviewModal');
+  if(e.target===overlay){ if(which==='doc') closeDocModal(); else closeReviewModal(); }
+}
+
+/* ════════════ BOOKING FLOW ════════════ */
+function openBooking(docId, editBookingId=null) {
+  currentDoc=doctors.find(d=>d.id===docId);
+  if(!currentDoc) return;
+  selectedDate=null; selectedTime=null;
+  editingBookingId=editBookingId;
+
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-booking').classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+  document.getElementById('breadcrumbDoc').textContent=currentDoc.name;
+
+  document.getElementById('bookingDocInfo').innerHTML=`
+    <div class="booking-doc-avatar" style="background:${currentDoc.color};color:var(--text2)">${currentDoc.initials}</div>
+    <div>
+      <div class="booking-doc-name">${currentDoc.name}</div>
+      <div class="booking-doc-spec">${currentDoc.spec} · ${currentDoc.hospital}</div>
+    </div>
+    <div class="booking-doc-price">${fmt(currentDoc.fee)}</div>`;
+
+  document.getElementById('sumDoc').textContent   = currentDoc.name;
+  document.getElementById('sumSpec').textContent  = currentDoc.spec;
+  document.getElementById('sumHosp').textContent  = currentDoc.hospital;
+  document.getElementById('sumFee').textContent   = fmt(currentDoc.fee);
+  document.getElementById('sumTotal').textContent = fmt(currentDoc.fee+5000);
+  document.getElementById('sumDate').textContent  = 'Belum dipilih';
+  document.getElementById('sumTime').textContent  = 'Belum dipilih';
+  document.getElementById('sumPatient').textContent='—';
+  document.getElementById('sumPayment').textContent='—';
+  document.getElementById('confirmBtn').disabled=true;
+
+  const editing = myBookings.find(b=>b.id===editBookingId);
+  document.getElementById('summaryTitle').textContent = editing ? 'Ubah Jadwal Booking' : 'Ringkasan Booking';
+  document.getElementById('confirmBtn').textContent = editing ? 'Simpan Perubahan →' : 'Konfirmasi Booking →';
+
+  document.getElementById('patName').value = editing ? editing.patient : '';
+  document.getElementById('patPhone').value = editing ? editing.phone : '';
+  document.getElementById('patDob').value = editing ? editing.dob : '';
+  document.getElementById('patGender').value = editing ? editing.gender : '';
+  document.getElementById('patComplaint').value = editing ? editing.complaint : '';
+  document.getElementById('patPayment').value = editing ? editing.payment : '';
+  ['patName','patPhone','patDob'].forEach(id=>{ document.getElementById(id).classList.remove('err'); document.getElementById('err-'+id).textContent=''; });
+
+  ['s2','s3','s4'].forEach((id,i)=>{
+    const el=document.getElementById(id);
+    el.textContent=i+2; el.classList.remove('done');
+  });
+  document.getElementById('timeCard').classList.add('locked');
+  document.getElementById('formCard').classList.add('locked');
+
+  const today=new Date();
+  calYear=today.getFullYear(); calMonth=today.getMonth();
+  renderCalendar();
+  if(editing){ updateSummary(); }
+}
+
+/* ════════════ CALENDAR (schedule-aware) ════════════ */
+function renderCalendar() {
+  const today=new Date();
+  const firstDay=new Date(calYear,calMonth,1).getDay();
+  const daysInMonth=new Date(calYear,calMonth+1,0).getDate();
+  const daysInPrev=new Date(calYear,calMonth,0).getDate();
+  document.getElementById('calMonth').textContent=`${MONTHS[calMonth]} ${calYear}`;
+  let html=WDAYS.map(d=>`<div class="cal-day-label">${d}</div>`).join('');
+  for(let i=firstDay-1;i>=0;i--) html+=`<div class="cal-day other">${daysInPrev-i}</div>`;
+  for(let d=1;d<=daysInMonth;d++) {
+    const date=new Date(calYear,calMonth,d);
+    const isPast=date<new Date(today.getFullYear(),today.getMonth(),today.getDate());
+    const isToday=date.toDateString()===today.toDateString();
+    const sched = scheduleFor(currentDoc, date);
+    const isOff = !sched.time;
+    const ds=`${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const isSel=selectedDate===ds;
+    let cls='cal-day';
+    if(isSel) cls+=' sel';
+    else if(isPast) cls+=' past';
+    else if(isOff) cls+=' off';
+    else cls+=' avail';
+    if(isToday&&!isSel) cls+=' today';
+    const click=(!isPast&&!isOff)?`onclick="selectDate('${ds}')"`:'';
+    const title = isOff && !isPast ? `title="${currentDoc.name.split(',')[0]} libur di hari ${sched.day}"` : '';
+    html+=`<button type="button" class="${cls}" ${click} ${title} ${(isPast||isOff)?'disabled':''}>${d}</button>`;
+  }
+  const total=firstDay+daysInMonth;
+  for(let i=1;i<=(total%7===0?0:7-total%7);i++) html+=`<div class="cal-day other">${i}</div>`;
+  document.getElementById('calGrid').innerHTML=html;
+}
+
+function changeMonth(dir) {
+  calMonth+=dir;
+  if(calMonth>11){calMonth=0;calYear++;}
+  if(calMonth<0){calMonth=11;calYear--;}
+  renderCalendar();
+}
+
+/* Generate time slots from a doctor's schedule range like "08:00–12:00" */
+function genSlots(rangeStr){
+  if(!rangeStr) return [];
+  const parts = rangeStr.split(/[–-]/);
+  let [sh,sm] = parts[0].split(':').map(Number);
+  let [eh,em] = parts[1].split(':').map(Number);
+  if(eh===24){ eh=23; em=59; }
+  const endMin = eh*60+em;
+  const slots=[];
+  let cur = sh*60+sm;
+  const step = 30;
+  while(cur+step<=endMin || (endMin-cur)>=step-1){
+    if(cur+step>endMin+1) break;
+    const h=Math.floor(cur/60), m=cur%60;
+    slots.push(String(h).padStart(2,'0')+':'+String(m).padStart(2,'0'));
+    cur+=step;
+  }
+  return slots;
+}
+
+/* Deterministic "already booked" slots per doctor+date so it's stable on refresh */
+function seededTakenIndices(doctorId, dateStr, total){
+  let seed=0;
+  const str=doctorId+'|'+dateStr;
+  for(let i=0;i<str.length;i++) seed=(seed*31+str.charCodeAt(i))>>>0;
+  const rng=()=>{ seed=(seed*1103515245+12345)>>>0; return seed/4294967295; };
+  const count=Math.max(1,Math.floor(total*0.22));
+  const taken=new Set();
+  let guard=0;
+  while(taken.size<count && taken.size<total && guard<500){ taken.add(Math.floor(rng()*total)); guard++; }
+  return taken;
+}
+
+function selectDate(ds) {
+  selectedDate=ds; selectedTime=null;
+  renderCalendar();
+  document.getElementById('timeCard').classList.remove('locked');
+  const s2=document.getElementById('s2'); s2.innerHTML='<svg class="icon" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>'; s2.classList.add('done');
+
+  const dateObj = new Date(ds+'T00:00:00');
+  const sched = scheduleFor(currentDoc, dateObj);
+  const slots = genSlots(sched.time);
+  const takenIdx = seededTakenIndices(currentDoc.id, ds, slots.length);
+  // also block a slot the user already booked with this doctor on this date (from another booking, excluding the one being edited)
+  const myTaken = new Set(myBookings.filter(b=>b.docId===currentDoc.id && b.date===ds && b.status==='upcoming' && b.id!==editingBookingId).map(b=>b.time));
+
+  const tg = document.getElementById('timeGrid');
+  if(!slots.length){
+    tg.innerHTML = `<div class="time-empty">Tidak ada jam praktik pada tanggal ini.</div>`;
+  } else {
+    tg.innerHTML = slots.map((t,i)=>{
+      const taken = takenIdx.has(i) || myTaken.has(t);
+      return `<div class="time-slot${taken?' taken':''}" ${!taken?`onclick="selectTime('${t}')"`:''}>${t}</div>`;
+    }).join('');
+  }
+
+  document.getElementById('sumDate').textContent=dateObj.toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  document.getElementById('sumTime').textContent='Belum dipilih';
+  checkConfirm();
+}
+
+function selectTime(t) {
+  selectedTime=t;
+  document.querySelectorAll('.time-slot').forEach(el=>el.classList.toggle('sel',el.textContent===t));
+  document.getElementById('formCard').classList.remove('locked');
+  const s3=document.getElementById('s3'); s3.innerHTML='<svg class="icon" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>'; s3.classList.add('done');
+  document.getElementById('sumTime').textContent=t+' WIB';
+  checkConfirm();
+}
+
+/* ════════════ FORM VALIDATION ════════════ */
+function validateField(id){
+  const el = document.getElementById(id);
+  const errEl = document.getElementById('err-'+id);
+  let msg='';
+  const v = el.value.trim();
+  if(id==='patName'){
+    if(v && v.length<3) msg='Nama minimal 3 karakter.';
+    else if(v && !/^[a-zA-Z .']+$/.test(v)) msg='Nama hanya boleh huruf dan spasi.';
+  }
+  if(id==='patPhone'){
+    if(v && !/^(\+62|0)8[0-9]{8,12}$/.test(v.replace(/[\s-]/g,''))) msg='Format nomor tidak valid, contoh: 0812-3456-7890.';
+  }
+  if(id==='patDob'){
+    if(v){
+      const dob=new Date(v);
+      const now=new Date();
+      const minDate=new Date(now.getFullYear()-120,now.getMonth(),now.getDate());
+      if(dob>now) msg='Tanggal lahir tidak boleh di masa depan.';
+      else if(dob<minDate) msg='Tanggal lahir tidak valid.';
+    }
+  }
+  el.classList.toggle('err', !!msg);
+  errEl.textContent = msg;
+  return !msg;
+}
+
+function updateSummary() {
+  const name=document.getElementById('patName').value.trim();
+  const pay=document.getElementById('patPayment').value;
+  document.getElementById('sumPatient').textContent=name||'—';
+  document.getElementById('sumPayment').textContent=pay||'—';
+  const s4=document.getElementById('s4');
+  if(name){ s4.innerHTML='<svg class="icon" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>'; s4.classList.add('done'); }
+  else { s4.textContent='4'; s4.classList.remove('done'); }
+  checkConfirm();
+}
+
+function checkConfirm() {
+  const name = document.getElementById('patName').value.trim();
+  const phone = document.getElementById('patPhone').value.trim();
+  const dob = document.getElementById('patDob').value.trim();
+  const validName = name.length>=3 && !document.getElementById('patName').classList.contains('err');
+  const validPhone = phone.length>0 && !document.getElementById('patPhone').classList.contains('err');
+  const validDob = !dob || !document.getElementById('patDob').classList.contains('err');
+  const ok = selectedDate && selectedTime && validName && validPhone && validDob &&
+    document.getElementById('patPayment').value;
+  document.getElementById('confirmBtn').disabled=!ok;
+}
+
+function confirmBooking() {
+  const nameOk = validateField('patName');
+  const phoneOk = validateField('patPhone');
+  const dobOk = validateField('patDob');
+  if(!nameOk || !phoneOk || !dobOk) { checkConfirm(); return; }
+
+  const btn=document.getElementById('confirmBtn');
+  const isEdit = !!editingBookingId;
+  btn.textContent='Memproses...'; btn.disabled=true;
+  setTimeout(async ()=>{
+    const date=new Date(selectedDate+'T00:00:00');
+    const dateStr=date.toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+    const name=document.getElementById('patName').value.trim();
+    const phone=document.getElementById('patPhone').value.trim();
+    const dob=document.getElementById('patDob').value;
+    const gender=document.getElementById('patGender').value;
+    const complaint=document.getElementById('patComplaint').value.trim();
+    const payment=document.getElementById('patPayment').value;
+
+    let code;
+    if(isEdit){
+      const b = myBookings.find(x=>x.id===editingBookingId);
+      b.date=selectedDate; b.time=selectedTime; b.patient=name; b.phone=phone; b.dob=dob;
+      b.gender=gender; b.complaint=complaint; b.payment=payment; b.status='upcoming';
+      code = b.id;
+    } else {
+      code='MBK-'+Math.floor(Math.random()*900000+100000);
+      myBookings.unshift({id:code,docId:currentDoc.id,docName:currentDoc.name,spec:currentDoc.spec,hospital:currentDoc.hospital,initials:currentDoc.initials,color:currentDoc.color,date:selectedDate,time:selectedTime,patient:name,phone,dob,gender,complaint,payment,fee:currentDoc.fee,status:'upcoming',reviewed:false});
+    }
+    await saveState();
+
+    document.getElementById('successTitle').textContent = isEdit ? 'Jadwal Diperbarui!' : 'Booking Berhasil!';
+    document.getElementById('successSub').textContent = isEdit ? 'Jadwal konsultasi Anda telah diperbarui. Pengingat akan dikirim 1 jam sebelum jadwal.' : 'Jadwal konsultasi Anda telah dikonfirmasi. Pengingat akan dikirim 1 jam sebelum jadwal.';
+    document.getElementById('successCode').textContent=code;
+    document.getElementById('successDetail').innerHTML=`
+      <div class="success-row"><span class="success-row-key">Dokter</span><span class="success-row-val">${currentDoc.name}</span></div>
+      <div class="success-row"><span class="success-row-key">Spesialisasi</span><span class="success-row-val">${currentDoc.spec}</span></div>
+      <div class="success-row"><span class="success-row-key">Klinik</span><span class="success-row-val">${currentDoc.hospital}</span></div>
+      <div class="success-row"><span class="success-row-key">Tanggal</span><span class="success-row-val">${dateStr}</span></div>
+      <div class="success-row"><span class="success-row-key">Jam</span><span class="success-row-val">${selectedTime} WIB</span></div>
+      <div class="success-row"><span class="success-row-key">Pasien</span><span class="success-row-val">${name}</span></div>
+      <div class="success-row"><span class="success-row-key">Pembayaran</span><span class="success-row-val">${payment}</span></div>
+      <div class="success-row"><span class="success-row-key">Total Bayar</span><span class="success-row-val" style="color:var(--blue)">${fmt(currentDoc.fee+5000)}</span></div>`;
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    document.getElementById('page-success').classList.add('active');
+    window.scrollTo({top:0,behavior:'smooth'});
+    showToast(isEdit ? 'Jadwal berhasil diperbarui 🎉' : 'Booking berhasil dikonfirmasi! 🎉');
+    editingBookingId=null;
+    updateHeaderStats();
+  },1000);
+}
+
+/* ════════════ MY BOOKINGS ════════════ */
+function renderBookings(filter) {
+  const list=filter==='all'?myBookings:myBookings.filter(b=>b.status===filter);
+  const bl=document.getElementById('bookingList');
+  const smap={upcoming:'status-upcoming',completed:'status-completed',cancelled:'status-cancelled'};
+  const slbl={upcoming:'Mendatang',completed:'Selesai',cancelled:'Dibatalkan'};
+  if(!list.length){
+    bl.innerHTML=`<div class="empty-state">${ICONS.calendar}<div class="empty-state-title">Belum ada booking</div><div class="empty-state-sub">Booking baru akan muncul di sini.</div></div>`;
+    return;
+  }
+  bl.innerHTML=list.map(b=>{
+    const d=new Date(b.date+'T00:00:00');
+    const ds=d.toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric'});
+    return `
+    <div class="booking-item">
+      <div class="booking-item-avatar" style="background:${b.color};color:var(--text2)">${b.initials}</div>
+      <div class="booking-item-info">
+        <div class="booking-item-doc">${b.docName}</div>
+        <div class="booking-item-spec">${b.spec} · ${b.hospital}</div>
+        <div class="booking-item-meta">
+          <span>${ICONS.calendar} ${ds}</span><span>${ICONS.clock} ${b.time} WIB</span>
+          <span>${ICONS.user} ${b.patient}</span><span>${ICONS.card} ${fmt(b.fee+5000)}</span>
+        </div>
+      </div>
+      <div class="booking-status ${smap[b.status]}">${slbl[b.status]}</div>
+      <div class="booking-item-actions">
+        ${b.status==='upcoming'?`
+          <button class="action-btn" onclick="openBooking(${b.docId},'${b.id}')">Ubah Jadwal</button>
+          <button class="action-btn danger" onclick="cancelBooking('${b.id}')">Batalkan</button>
+        `:b.status==='completed'?`
+          <button class="action-btn" ${b.reviewed?'disabled':''} onclick="openReviewModal('${b.id}')">${b.reviewed?'Ulasan Terkirim ✓':'Beri Ulasan ★'}</button>
+          <button class="action-btn" onclick="openBooking(${b.docId})">Booking Lagi</button>
+        `:`<button class="action-btn" onclick="openBooking(${b.docId})">Booking Lagi</button>`}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function filterBookings(filter,btn) {
+  document.querySelectorAll('#page-bookings .nav-pill').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderBookings(filter);
+}
+
+async function cancelBooking(id) {
+  if(!confirm('Yakin ingin membatalkan booking ini?')) return;
+  const b=myBookings.find(x=>x.id===id);
+  if(b) b.status='cancelled';
+  await saveState();
+  renderBookings('all');
+  document.querySelectorAll('#page-bookings .nav-pill')[0].classList.add('active');
+  showToast('Booking dibatalkan');
+  updateHeaderStats();
+}
+
+/* ════════════ REVIEW MODAL ════════════ */
+function openReviewModal(bookingId){
+  const b = myBookings.find(x=>x.id===bookingId);
+  if(!b) return;
+  reviewTargetBookingId=bookingId;
+  reviewStars=0;
+  document.getElementById('reviewModalBox').innerHTML = `
+    <div class="mini-modal-hd">
+      <div>
+        <div class="mini-modal-title">Beri Ulasan</div>
+        <div class="mini-modal-sub">${b.docName} · ${b.spec}</div>
+      </div>
+      <button class="doc-modal-close" style="position:static;background:var(--bg2);border-color:var(--border);color:var(--text2)" onclick="closeReviewModal()" aria-label="Tutup">✕</button>
+    </div>
+    <div class="star-picker" id="starPicker">
+      ${[1,2,3,4,5].map(n=>`<button type="button" aria-label="${n} bintang" onclick="setReviewStars(${n})">${ICONS.star}</button>`).join('')}
+    </div>
+    <div class="form-field">
+      <label class="form-label" for="reviewText">Ceritakan pengalaman Anda</label>
+      <textarea class="form-textarea" id="reviewText" placeholder="Bagaimana pelayanan dokter?"></textarea>
+    </div>
+    <button class="confirm-btn" style="margin-top:1rem" onclick="submitReview()">Kirim Ulasan</button>
+  `;
+  document.getElementById('reviewModal').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function setReviewStars(n){
+  reviewStars=n;
+  document.querySelectorAll('#starPicker button').forEach((b,i)=>b.classList.toggle('on', i<n));
+}
+function closeReviewModal(){
+  document.getElementById('reviewModal').classList.remove('open');
+  document.body.style.overflow='';
+  reviewTargetBookingId=null;
+}
+async function submitReview(){
+  if(reviewStars===0){ showToast('Pilih rating bintang terlebih dahulu'); return; }
+  const b = myBookings.find(x=>x.id===reviewTargetBookingId);
+  if(!b) return;
+  const d = doctors.find(x=>x.id===b.docId);
+  const text = document.getElementById('reviewText').value.trim() || 'Pelayanan memuaskan.';
+  const newRating = ((d.rating*d.reviews)+reviewStars)/(d.reviews+1);
+  d.rating = Math.round(newRating*10)/10;
+  d.reviews += 1;
+  d.patientReviews.unshift({author:b.patient||'Anda', date:new Date().toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric'}), stars:reviewStars, text});
+  b.reviewed = true;
+  await saveState();
+  closeReviewModal();
+  const labelToFilter={'Semua':'all','Mendatang':'upcoming','Selesai':'completed','Dibatalkan':'cancelled'};
+  const activeLabel = document.querySelector('#page-bookings .nav-pill.active')?.textContent || 'Semua';
+  renderBookings(labelToFilter[activeLabel] || 'all');
+  filterDoctors();
+  showToast('Terima kasih atas ulasan Anda! ⭐');
+}
+
+/* ════════════ NOTIFICATIONS ════════════ */
+function toggleNotif(e){
+  e.stopPropagation();
+  const panel = document.getElementById('notifPanel');
+  panel.classList.contains('open') ? closeNotif() : openNotif();
+}
+function openNotif(){
+  const upcoming = myBookings.filter(b=>b.status==='upcoming').sort((a,b)=>a.date.localeCompare(b.date));
+  const toReview = myBookings.filter(b=>b.status==='completed' && !b.reviewed);
+  const panel = document.getElementById('notifPanel');
+  let items='';
+  upcoming.forEach(b=>{
+    const d=new Date(b.date+'T00:00:00').toLocaleDateString('id-ID',{day:'numeric',month:'short'});
+    items += `<div class="notif-item">${ICONS.calendar}<div><div class="notif-item-title">Jadwal dengan ${b.docName.split(',')[0]}</div><div class="notif-item-sub">${d} · ${b.time} WIB</div></div></div>`;
+  });
+  toReview.forEach(b=>{
+    items += `<div class="notif-item">${ICONS.star}<div><div class="notif-item-title">Beri ulasan untuk ${b.docName.split(',')[0]}</div><div class="notif-item-sub">Konsultasi Anda telah selesai</div></div></div>`;
+  });
+  panel.innerHTML = `<div class="notif-panel-hd">Notifikasi</div>${items || `<div class="notif-empty">Tidak ada notifikasi baru</div>`}`;
+  panel.classList.add('open');
+  updateNotifBadge();
+}
+function closeNotif(){ document.getElementById('notifPanel').classList.remove('open'); }
+function updateNotifBadge(){
+  const count = myBookings.filter(b=>b.status==='upcoming').length + myBookings.filter(b=>b.status==='completed' && !b.reviewed).length;
+  const badge = document.getElementById('notifBadge');
+  if(count>0){ badge.hidden=false; badge.textContent=count; } else { badge.hidden=true; }
+}
+document.addEventListener('click',(e)=>{
+  const panel=document.getElementById('notifPanel');
+  if(panel.classList.contains('open') && !panel.contains(e.target) && e.target.id!=='notifBtn') closeNotif();
+});
+
+function updateHeaderStats(){
+  document.getElementById('statBookings').textContent = myBookings.filter(b=>b.status!=='cancelled').length;
+  document.getElementById('statFav').textContent = favorites.size;
+  updateNotifBadge();
+}
+
+/* ════════════ TOAST ════════════ */
+let toastTimer;
+function showToast(msg) {
+  const t=document.getElementById('toast');
+  document.getElementById('toastMsg').textContent=msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove('show'),3200);
+}
+
+/* ════════════ ESC CLOSE MODAL ════════════ */
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){ closeDocModal(); closeReviewModal(); closeNotif(); }
+});
+
+/* ════════════ INIT ════════════ */
+(async function init(){
+  renderDoctorsSkeleton();
+  await loadState();
+  filterDoctors();
+  updateHeaderStats();
+})();
+</script>
+</body>
+</html>
