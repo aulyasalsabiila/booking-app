@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MediBook — Booking Klinik Online</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,600;0,700;1,300;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- TOPBAR -->
+<header class="topbar">
+  <div class="topbar-logo"><div class="logo-cross">
+      <svg class="icon" viewBox="0 0 24 24"><path d="M12 2v20M2 12h20"/></svg>
+    </div>MediBook</div>
+  <nav class="topbar-nav">
+    <button class="nav-pill active" onclick="goPage('home')">Beranda</button>
+    <button class="nav-pill" onclick="goPage('bookings')">Booking Saya</button>
+  </nav>
+  <div class="topbar-right">
+    <button class="icon-btn" id="notifBtn" aria-label="Notifikasi" aria-haspopup="true" onclick="toggleNotif(event)">
+      <svg class="icon" viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      <span class="notif-badge" id="notifBadge" hidden>0</span>
+    </button>
+    <div class="notif-panel" id="notifPanel"></div>
+    <div class="avatar-btn" title="Aulya Salsabila">AS</div>
+    <button class="hamburger" aria-label="Menu" onclick="toggleMobileNav()">
+      <svg class="icon" viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
+  </div>
+</header>
+<div class="mobile-nav" id="mobileNav">
+  <button class="nav-pill active" onclick="goPage('home');toggleMobileNav()">Beranda</button>
+  <button class="nav-pill" onclick="goPage('bookings');toggleMobileNav()">Booking Saya</button>
+</div>
+
+<!-- HOME PAGE -->
+<div class="page active" id="page-home">
+  <div class="hero-section">
+    <div class="hero-badge">✚ Layanan Kesehatan Digital</div>
+    <h1 class="hero-title">Booking Dokter<br><em>Kapan Saja, Di Mana Saja</em></h1>
+    <p class="hero-sub">Temukan dokter terbaik, pilih jadwal yang sesuai jam praktiknya, dan booking dalam hitungan menit.</p>
+    <div class="hero-search">
+      <div class="search-field">
+        <svg class="icon search-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+        <input class="search-input" id="searchInput" placeholder="Cari nama dokter atau spesialisasi..." oninput="filterDoctors()" aria-label="Cari dokter">
+      </div>
+      <select class="search-select" id="specFilter" onchange="syncSpecChip();filterDoctors()" aria-label="Filter spesialisasi">
+        <option value="">Semua Spesialisasi</option>
+        <option>Umum</option><option>Gigi</option><option>Anak</option>
+        <option>Jantung</option><option>Kulit</option><option>Mata</option><option>Psikiatri</option>
+      </select>
+      <button class="search-btn" onclick="filterDoctors()">Cari</button>
+    </div>
+    <div class="stats-strip">
+      <div class="stat-item"><div class="stat-num">8</div><div class="stat-lbl">Dokter Aktif</div></div>
+      <div class="stat-item"><div class="stat-num" id="statBookings">3</div><div class="stat-lbl">Booking Anda</div></div>
+      <div class="stat-item"><div class="stat-num" id="statFav">0</div><div class="stat-lbl">Dokter Favorit</div></div>
+    </div>
+  </div>
+  <div class="content">
+    <div style="margin-bottom:2rem">
+      <div class="eyebrow" style="margin-bottom:.7rem">Spesialisasi</div>
+      <div class="spec-scroll" id="specChips">
+        <div class="spec-chip active" data-spec="" onclick="selectSpec(this)"><span>🏥</span> Semua</div>
+        <div class="spec-chip" data-spec="Umum" onclick="selectSpec(this)"><span>🩺</span> Umum</div>
+        <div class="spec-chip" data-spec="Gigi" onclick="selectSpec(this)"><span>🦷</span> Gigi</div>
+        <div class="spec-chip" data-spec="Anak" onclick="selectSpec(this)"><span>👶</span> Anak</div>
+        <div class="spec-chip" data-spec="Jantung" onclick="selectSpec(this)"><span>❤️</span> Jantung</div>
+        <div class="spec-chip" data-spec="Kulit" onclick="selectSpec(this)"><span>✨</span> Kulit</div>
+        <div class="spec-chip" data-spec="Mata" onclick="selectSpec(this)"><span>👁️</span> Mata</div>
+        <div class="spec-chip" data-spec="Psikiatri" onclick="selectSpec(this)"><span>🧠</span> Psikiatri</div>
+      </div>
+    </div>
+    <div class="filter-bar">
+      <select class="filter-select" id="sortFilter" onchange="filterDoctors()" aria-label="Urutkan">
+        <option value="rating">Rating Tertinggi</option>
+        <option value="price-asc">Harga Terendah</option>
+        <option value="price-desc">Harga Tertinggi</option>
+        <option value="exp">Pengalaman Terlama</option>
+      </select>
+      <select class="filter-select" id="availFilter" onchange="filterDoctors()" aria-label="Filter ketersediaan">
+        <option value="">Semua Jadwal</option>
+        <option value="today">Tersedia Hari Ini</option>
+        <option value="favorite">❤️ Favorit Saya</option>
+      </select>
+      <span class="result-count" id="resultCount">Menampilkan 8 dokter</span>
+    </div>
+    <div class="doctor-grid" id="doctorGrid"></div>
+  </div>
+</div>
+
+<!-- BOOKING PAGE -->
+<div class="page" id="page-booking">
+  <div class="content" style="margin-top:1.5rem">
+    <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:1.5rem;font-size:.78rem;color:var(--muted)">
+      <span style="cursor:pointer;color:var(--rose)" onclick="goPage('home')">Beranda</span>
+      <span>›</span><span style="cursor:pointer;color:var(--rose)" onclick="goPage('home')">Dokter</span>
+      <span>›</span><span id="breadcrumbDoc" style="color:var(--text);font-weight:600">Booking</span>
+    </div>
+    <div class="booking-shell">
+      <div class="booking-left">
+        <!-- Step 1: Doctor -->
+        <div class="booking-card">
+          <div class="booking-card-title"><span class="step-badge done"><svg class="icon" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></span> Dokter Dipilih</div>
+          <div class="booking-doc" id="bookingDocInfo"></div>
+        </div>
+        <!-- Step 2: Calendar -->
+        <div class="booking-card">
+          <div class="booking-card-title"><span class="step-badge" id="s2">2</span> Pilih Tanggal</div>
+          <div class="cal-legend"><span><i style="background:var(--rose)"></i> Hari ini</span><span><i style="background:var(--danger)"></i> Klinik libur</span></div>
+          <div class="cal-header">
+            <button class="cal-nav" onclick="changeMonth(-1)" aria-label="Bulan sebelumnya"><svg class="icon" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg></button>
+            <span class="cal-month" id="calMonth">—</span>
+            <button class="cal-nav" onclick="changeMonth(1)" aria-label="Bulan berikutnya"><svg class="icon" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></button>
+          </div>
+          <div class="cal-grid" id="calGrid"></div>
+        </div>
+        <!-- Step 3: Time -->
+        <div class="booking-card locked" id="timeCard">
+          <div class="booking-card-title"><span class="step-badge" id="s3">3</span> Pilih Jam</div>
+          <div class="time-grid" id="timeGrid"></div>
+        </div>
+        <!-- Step 4: Form -->
+        <div class="booking-card locked" id="formCard">
+          <div class="booking-card-title"><span class="step-badge" id="s4">4</span> Data Pasien</div>
+          <div class="form-grid">
+            <div class="form-field"><label class="form-label" for="patName">Nama Lengkap</label><input class="form-input" id="patName" placeholder="Nama sesuai KTP" oninput="validateField('patName');updateSummary()"><span class="field-err" id="err-patName"></span></div>
+            <div class="form-field"><label class="form-label" for="patPhone">No. Telepon</label><input class="form-input" id="patPhone" placeholder="08xx-xxxx-xxxx" oninput="validateField('patPhone');updateSummary()"><span class="field-err" id="err-patPhone"></span></div>
+            <div class="form-field"><label class="form-label" for="patDob">Tanggal Lahir</label><input class="form-input" type="date" id="patDob" oninput="validateField('patDob');updateSummary()"><span class="field-err" id="err-patDob"></span></div>
+            <div class="form-field">
+              <label class="form-label" for="patGender">Jenis Kelamin</label>
+              <select class="form-select" id="patGender" onchange="updateSummary()"><option value="">Pilih</option><option>Laki-laki</option><option>Perempuan</option></select>
+              <span class="field-err"></span>
+            </div>
+            <div class="form-field full"><label class="form-label" for="patComplaint">Keluhan / Gejala</label><textarea class="form-textarea" id="patComplaint" placeholder="Ceritakan keluhan yang dirasakan..." oninput="updateSummary()"></textarea></div>
+            <div class="form-field full">
+              <label class="form-label" for="patPayment">Metode Pembayaran</label>
+              <select class="form-select" id="patPayment" onchange="updateSummary()">
+                <option value="">Pilih metode</option>
+                <option>Transfer Bank (BCA)</option><option>GoPay / OVO / Dana</option><option>BPJS Kesehatan</option><option>Bayar di Klinik</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Summary Sidebar -->
+      <div>
+        <div class="summary-card">
+          <div class="summary-header"><div class="summary-title" id="summaryTitle">Ringkasan Booking</div><div class="summary-sub">Periksa detail sebelum konfirmasi</div></div>
+          <div class="summary-body">
+            <div class="summary-row"><span class="summary-key">Dokter</span><span class="summary-val hl" id="sumDoc">—</span></div>
+            <div class="summary-row"><span class="summary-key">Spesialisasi</span><span class="summary-val" id="sumSpec">—</span></div>
+            <div class="summary-row"><span class="summary-key">Klinik</span><span class="summary-val" id="sumHosp">—</span></div>
+            <div class="summary-row"><span class="summary-key">Tanggal</span><span class="summary-val" id="sumDate">Belum dipilih</span></div>
+            <div class="summary-row"><span class="summary-key">Jam</span><span class="summary-val" id="sumTime">Belum dipilih</span></div>
+            <div class="summary-row"><span class="summary-key">Pasien</span><span class="summary-val" id="sumPatient">—</span></div>
+            <div class="summary-row"><span class="summary-key">Pembayaran</span><span class="summary-val" id="sumPayment">—</span></div>
+            <div class="summary-div"></div>
+            <div class="summary-row"><span class="summary-key">Biaya Konsultasi</span><span class="summary-val" id="sumFee">—</span></div>
+            <div class="summary-row"><span class="summary-key">Biaya Admin</span><span class="summary-val">Rp 5.000</span></div>
+            <div class="summary-div"></div>
+            <div class="summary-total"><span class="summary-total-lbl">Total</span><span class="summary-total-val" id="sumTotal">—</span></div>
+            <button class="confirm-btn" id="confirmBtn" onclick="confirmBooking()" disabled>Konfirmasi Booking →</button>
+            <p class="summary-note">Dengan menekan tombol di atas, Anda menyetujui kebijakan pembatalan kami.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MY BOOKINGS PAGE -->
+<div class="page" id="page-bookings">
+  <div class="content" style="margin-top:1.5rem">
+    <div class="sec-hd" style="margin-bottom:1.5rem">
+      <div><div class="eyebrow">Riwayat</div><div class="sec-title">Booking <em>Saya</em></div></div>
+      <button class="search-btn" onclick="goPage('home')">+ Booking Baru</button>
+    </div>
+    <div style="display:flex;gap:.4rem;margin-bottom:1.5rem;border-bottom:1px solid var(--border);padding-bottom:.75rem">
+      <button class="nav-pill active" onclick="filterBookings('all',this)">Semua</button>
+      <button class="nav-pill" onclick="filterBookings('upcoming',this)">Mendatang</button>
+      <button class="nav-pill" onclick="filterBookings('completed',this)">Selesai</button>
+      <button class="nav-pill" onclick="filterBookings('cancelled',this)">Dibatalkan</button>
+    </div>
+    <div class="booking-list" id="bookingList"></div>
+  </div>
+</div>
+
+<!-- SUCCESS PAGE -->
+<div class="page" id="page-success">
+  <div class="content" style="margin-top:2rem">
+    <div class="success-wrap">
+      <div class="success-icon"><svg class="icon" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></div>
+      <h2 class="success-title" id="successTitle">Booking Berhasil!</h2>
+      <p class="success-sub" id="successSub">Jadwal konsultasi Anda telah dikonfirmasi. Pengingat akan dikirim 1 jam sebelum jadwal.</p>
+      <div class="booking-code" id="successCode">MBK-000000</div>
+      <div class="success-detail" id="successDetail"></div>
+      <div class="success-actions">
+        <button class="confirm-btn" onclick="goPage('bookings')" style="flex:1">Lihat Semua Booking</button>
+        <button onclick="goPage('home')" style="flex:1;background:var(--bg2);color:var(--text);border:1px solid var(--border);border-radius:10px;padding:.9rem;font-weight:800;cursor:pointer;transition:background .2s" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='var(--bg2)'">Booking Lagi</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DOCTOR PROFILE MODAL -->
+<div class="modal-overlay" id="docModal" onclick="handleModalClick(event,'doc')">
+  <div class="doc-modal" id="docModalBox" role="dialog" aria-modal="true"></div>
+</div>
+
+<!-- REVIEW MODAL -->
+<div class="modal-overlay" id="reviewModal" onclick="handleModalClick(event,'review')">
+  <div class="mini-modal" id="reviewModalBox" role="dialog" aria-modal="true"></div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast" role="status" aria-live="polite"><span class="toast-dot"></span><span id="toastMsg"></span></div>
+
+<script src="script.js"></script>
+</body>
+</html>
